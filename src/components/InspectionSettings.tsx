@@ -26,7 +26,10 @@ import {
   Clock,
   Circle,
   Copy,
-  Move
+  Move,
+  FileText,
+  Image,
+  MessageSquare
 } from 'lucide-react';
 
 interface SectionModalProps {
@@ -45,6 +48,7 @@ const SectionModal: React.FC<SectionModalProps> = ({ section, isOpen, onClose, o
     icon: '🔧',
     color: 'bg-blue-100 text-blue-800 border-blue-200',
     isActive: true,
+    isCustomerVisible: true,
     order: 1
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -58,6 +62,7 @@ const SectionModal: React.FC<SectionModalProps> = ({ section, isOpen, onClose, o
         icon: section.icon,
         color: section.color,
         isActive: section.isActive,
+        isCustomerVisible: section.isCustomerVisible !== undefined ? section.isCustomerVisible : true,
         order: section.order
       });
     } else {
@@ -69,6 +74,7 @@ const SectionModal: React.FC<SectionModalProps> = ({ section, isOpen, onClose, o
         icon: '🔧',
         color: 'bg-blue-100 text-blue-800 border-blue-200',
         isActive: true,
+        isCustomerVisible: true,
         order: maxOrder + 1
       });
     }
@@ -102,6 +108,7 @@ const SectionModal: React.FC<SectionModalProps> = ({ section, isOpen, onClose, o
       icon: formData.icon,
       color: formData.color,
       isActive: formData.isActive,
+      isCustomerVisible: formData.isCustomerVisible,
       order: formData.order,
       items: section?.items || []
     });
@@ -261,7 +268,7 @@ const SectionModal: React.FC<SectionModalProps> = ({ section, isOpen, onClose, o
               />
             </div>
 
-            <div className="flex items-center">
+            <div className="flex flex-col justify-center space-y-3">
               <label className="flex items-center gap-2">
                 <input
                   type="checkbox"
@@ -270,6 +277,16 @@ const SectionModal: React.FC<SectionModalProps> = ({ section, isOpen, onClose, o
                   className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                 />
                 <span className="text-sm font-medium text-gray-700">Section is active</span>
+              </label>
+              
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={formData.isCustomerVisible}
+                  onChange={(e) => setFormData(prev => ({ ...prev, isCustomerVisible: e.target.checked }))}
+                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+                <span className="text-sm font-medium text-gray-700">Visible in customer PDF</span>
               </label>
             </div>
           </div>
@@ -281,6 +298,17 @@ const SectionModal: React.FC<SectionModalProps> = ({ section, isOpen, onClose, o
               <span>{formData.icon}</span>
               <span>{formData.label || 'Section Name'}</span>
             </div>
+            {formData.isCustomerVisible ? (
+              <div className="mt-2 inline-flex items-center gap-1 px-2 py-0.5 bg-green-100 text-green-700 rounded-full text-xs font-medium border border-green-200">
+                <Eye className="w-3 h-3" />
+                <span>Customer Visible</span>
+              </div>
+            ) : (
+              <div className="mt-2 inline-flex items-center gap-1 px-2 py-0.5 bg-gray-100 text-gray-700 rounded-full text-xs font-medium border border-gray-200">
+                <EyeOff className="w-3 h-3" />
+                <span>Hidden from Customer</span>
+              </div>
+            )}
           </div>
 
           <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-gray-200/60">
@@ -476,7 +504,7 @@ const InspectionSettings: React.FC = () => {
   const { dealership, user } = useAuth();
   const [settings, setSettings] = useState<InspectionSettingsType | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'sections' | 'ratings' | 'global'>('sections');
+  const [activeTab, setActiveTab] = useState<'sections' | 'ratings' | 'global' | 'pdf'>('sections');
   const [showSectionModal, setShowSectionModal] = useState(false);
   const [showItemModal, setShowItemModal] = useState(false);
   const [editingSection, setEditingSection] = useState<InspectionSection | null>(null);
@@ -540,6 +568,18 @@ const InspectionSettings: React.FC = () => {
     loadSettings();
   };
 
+  const handleToggleSectionCustomerVisible = (sectionId: string) => {
+    if (!dealership) return;
+    
+    const section = settings?.sections.find(s => s.id === sectionId);
+    if (!section) return;
+
+    InspectionSettingsManager.updateSection(dealership.id, sectionId, {
+      isCustomerVisible: !section.isCustomerVisible
+    });
+    loadSettings();
+  };
+
   const handleAddItem = (itemData: Omit<InspectionItem, 'id' | 'createdAt' | 'updatedAt'>) => {
     if (!dealership || !selectedSectionId) return;
     
@@ -588,6 +628,13 @@ const InspectionSettings: React.FC = () => {
     if (!dealership) return;
     
     InspectionSettingsManager.updateRatingLabel(dealership.id, labelKey, updates);
+    loadSettings();
+  };
+
+  const handleUpdatePdfSettings = (updates: Partial<InspectionSettingsType['customerPdfSettings']>) => {
+    if (!dealership || !settings) return;
+    
+    InspectionSettingsManager.updateCustomerPdfSettings(dealership.id, updates);
     loadSettings();
   };
 
@@ -739,7 +786,7 @@ const InspectionSettings: React.FC = () => {
 
       {/* Tab Navigation */}
       <div className="bg-white/60 backdrop-blur-sm rounded-xl p-1.5 shadow-lg border border-white/20">
-        <div className="flex">
+        <div className="flex flex-wrap">
           <button
             onClick={() => setActiveTab('sections')}
             className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold transition-all duration-200 ${
@@ -761,6 +808,17 @@ const InspectionSettings: React.FC = () => {
           >
             <Star className="w-5 h-5" />
             Rating Labels
+          </button>
+          <button
+            onClick={() => setActiveTab('pdf')}
+            className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold transition-all duration-200 ${
+              activeTab === 'pdf'
+                ? 'bg-white text-blue-600 shadow-md border border-blue-100'
+                : 'text-gray-600 hover:text-gray-900 hover:bg-white/50'
+            }`}
+          >
+            <FileText className="w-5 h-5" />
+            PDF Settings
           </button>
           <button
             onClick={() => setActiveTab('global')}
@@ -823,6 +881,17 @@ const InspectionSettings: React.FC = () => {
                             Inactive
                           </span>
                         )}
+                        {section.isCustomerVisible ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
+                            <Eye className="w-3 h-3" />
+                            Customer Visible
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-medium">
+                            <EyeOff className="w-3 h-3" />
+                            Hidden from Customer
+                          </span>
+                        )}
                       </div>
                       <div className="flex items-center gap-2">
                         <button
@@ -835,6 +904,21 @@ const InspectionSettings: React.FC = () => {
                           title={section.isActive ? 'Deactivate section' : 'Activate section'}
                         >
                           {section.isActive ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                        </button>
+                        <button
+                          onClick={() => handleToggleSectionCustomerVisible(section.id)}
+                          className={`p-2 rounded-lg transition-colors ${
+                            section.isCustomerVisible
+                              ? 'text-blue-600 hover:bg-blue-50'
+                              : 'text-gray-400 hover:bg-gray-50'
+                          }`}
+                          title={section.isCustomerVisible ? 'Hide from customer PDF' : 'Show in customer PDF'}
+                        >
+                          {section.isCustomerVisible ? (
+                            <FileText className="w-4 h-4" />
+                          ) : (
+                            <EyeOff className="w-4 h-4" />
+                          )}
                         </button>
                         <button
                           onClick={() => setEditingSection(section)}
@@ -996,6 +1080,146 @@ const InspectionSettings: React.FC = () => {
                 </div>
               );
             })}
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'pdf' && (
+        <div className="bg-white/70 backdrop-blur-sm rounded-xl shadow-lg border border-white/20 p-6">
+          <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+            <FileText className="w-5 h-5" />
+            Customer PDF Settings
+          </h3>
+          <p className="text-gray-600 mb-6">Configure how inspection reports appear to customers.</p>
+          
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <h4 className="font-medium text-gray-900">Content Settings</h4>
+                
+                <label className="flex items-center justify-between p-4 bg-gray-50/80 rounded-lg border border-gray-200/60">
+                  <div>
+                    <span className="font-medium text-gray-900">Include Vehicle Photos</span>
+                    <p className="text-sm text-gray-600">Show vehicle photos in the PDF report</p>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={settings.customerPdfSettings.includeVehiclePhotos}
+                    onChange={(e) => handleUpdatePdfSettings({ includeVehiclePhotos: e.target.checked })}
+                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                </label>
+
+                <label className="flex items-center justify-between p-4 bg-gray-50/80 rounded-lg border border-gray-200/60">
+                  <div>
+                    <span className="font-medium text-gray-900">Include Customer Comments</span>
+                    <p className="text-sm text-gray-600">Show customer comments in the PDF report</p>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={settings.customerPdfSettings.includeCustomerComments}
+                    onChange={(e) => handleUpdatePdfSettings({ includeCustomerComments: e.target.checked })}
+                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                </label>
+
+                <label className="flex items-center justify-between p-4 bg-gray-50/80 rounded-lg border border-gray-200/60">
+                  <div>
+                    <span className="font-medium text-gray-900">Show Detailed Ratings</span>
+                    <p className="text-sm text-gray-600">Display detailed rating information for each item</p>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={settings.customerPdfSettings.showDetailedRatings}
+                    onChange={(e) => handleUpdatePdfSettings({ showDetailedRatings: e.target.checked })}
+                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                </label>
+              </div>
+
+              <div className="space-y-4">
+                <h4 className="font-medium text-gray-900">Branding & Text</h4>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Footer Text
+                  </label>
+                  <textarea
+                    value={settings.customerPdfSettings.footerText || ''}
+                    onChange={(e) => handleUpdatePdfSettings({ footerText: e.target.value })}
+                    placeholder="Custom footer text for PDF reports..."
+                    rows={3}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    This text will appear at the bottom of each PDF report
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="border-t border-gray-200 pt-6">
+              <h4 className="font-medium text-gray-900 mb-4">Section Visibility</h4>
+              <p className="text-sm text-gray-600 mb-4">
+                Control which inspection sections are visible to customers in the PDF report.
+                You can also toggle visibility for each section from the Sections tab.
+              </p>
+              
+              <div className="space-y-3">
+                {settings.sections
+                  .sort((a, b) => a.order - b.order)
+                  .map((section) => (
+                    <div key={section.id} className="flex items-center justify-between p-3 bg-gray-50/80 rounded-lg border border-gray-200/60">
+                      <div className="flex items-center gap-3">
+                        <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium border ${section.color}`}>
+                          <span>{section.icon}</span>
+                          <span>{section.label}</span>
+                        </div>
+                        {!section.isActive && (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-red-100 text-red-700 rounded-full text-xs font-medium">
+                            <EyeOff className="w-3 h-3" />
+                            Inactive
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className="text-sm text-gray-600">
+                          {section.isCustomerVisible ? 'Visible to customer' : 'Hidden from customer'}
+                        </span>
+                        <button
+                          onClick={() => handleToggleSectionCustomerVisible(section.id)}
+                          className={`p-2 rounded-lg transition-colors ${
+                            section.isCustomerVisible
+                              ? 'text-green-600 hover:bg-green-50'
+                              : 'text-gray-400 hover:bg-gray-50'
+                          }`}
+                          title={section.isCustomerVisible ? 'Hide from customer' : 'Show to customer'}
+                        >
+                          {section.isCustomerVisible ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            </div>
+
+            <div className="border-t border-gray-200 pt-6">
+              <h4 className="font-medium text-gray-900 mb-4">PDF Preview</h4>
+              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-center">
+                <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-600 mb-4">Preview how your inspection report will look to customers.</p>
+                <p className="text-sm text-gray-500 mb-4">
+                  The PDF will include all sections marked as "Customer Visible" with their inspection items and ratings.
+                </p>
+                <button
+                  onClick={() => {/* PDF preview functionality would go here */}}
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  <Eye className="w-4 h-4" />
+                  Preview Sample PDF
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

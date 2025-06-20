@@ -7,6 +7,7 @@ import { AnalyticsManager } from '../utils/analytics';
 import StatusBadge from './StatusBadge';
 import InspectionChecklist from './InspectionChecklist';
 import TeamNotes from './TeamNotes';
+import CustomerInspectionPDF from './CustomerInspectionPDF';
 import { 
   ArrowLeft, 
   Car, 
@@ -26,7 +27,9 @@ import {
   FileText,
   Eye,
   MessageSquare,
-  ClipboardList
+  ClipboardList,
+  Download,
+  Printer
 } from 'lucide-react';
 
 const VehicleDetail: React.FC = () => {
@@ -39,6 +42,7 @@ const VehicleDetail: React.FC = () => {
   const [isEditingNotes, setIsEditingNotes] = useState(false);
   const [editedNotes, setEditedNotes] = useState('');
   const [rightPanelView, setRightPanelView] = useState<'inspection' | 'team-notes'>('inspection');
+  const [showPdfModal, setShowPdfModal] = useState(false);
   
   // NEW: Location editing state
   const [isEditingLocation, setIsEditingLocation] = useState(false);
@@ -476,6 +480,15 @@ const VehicleDetail: React.FC = () => {
                   Ready for Sale
                 </div>
               )}
+
+              {/* Customer PDF Button */}
+              <button
+                onClick={() => setShowPdfModal(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+              >
+                <FileText className="w-4 h-4" />
+                Customer PDF
+              </button>
             </div>
           </div>
         </div>
@@ -646,6 +659,17 @@ const VehicleDetail: React.FC = () => {
                 )}
               </div>
             )}
+
+            {/* Mobile Customer PDF Button */}
+            <div className="mt-4 pt-4 border-t border-gray-200/60">
+              <button
+                onClick={() => setShowPdfModal(true)}
+                className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+              >
+                <FileText className="w-4 h-4" />
+                Generate Customer PDF
+              </button>
+            </div>
           </div>
 
           {/* Mobile Right Panel Toggle */}
@@ -944,6 +968,17 @@ const VehicleDetail: React.FC = () => {
                   )}
                 </div>
               )}
+
+              {/* Customer PDF Button */}
+              <div className="mt-4 pt-4 border-t border-gray-200/60">
+                <button
+                  onClick={() => setShowPdfModal(true)}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                >
+                  <FileText className="w-4 h-4" />
+                  Generate Customer PDF
+                </button>
+              </div>
             </div>
 
             {/* Desktop Vehicle Information */}
@@ -1085,6 +1120,13 @@ const VehicleDetail: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Customer Inspection PDF Modal */}
+      <CustomerInspectionPDF
+        vehicle={vehicle}
+        isOpen={showPdfModal}
+        onClose={() => setShowPdfModal(false)}
+      />
     </div>
   );
 };

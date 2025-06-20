@@ -17,6 +17,7 @@ export interface InspectionSection {
   icon: string; // emoji or icon name
   color: string; // CSS classes for styling
   isActive: boolean;
+  isCustomerVisible: boolean; // NEW: Controls if section appears in customer PDF
   order: number;
   items: InspectionItem[];
   createdAt: string;
@@ -43,6 +44,13 @@ export interface InspectionSettings {
     showProgressPercentage: boolean;
     enableTeamNotes: boolean;
   };
+  customerPdfSettings: {
+    includeVehiclePhotos: boolean;
+    includeCustomerComments: boolean;
+    showDetailedRatings: boolean;
+    companyLogo?: string;
+    footerText?: string;
+  };
   createdAt: string;
   updatedAt: string;
 }
@@ -58,6 +66,7 @@ export const DEFAULT_INSPECTION_SETTINGS: Omit<InspectionSettings, 'id' | 'deale
       icon: '🌱',
       color: 'bg-green-100 text-green-800 border-green-200',
       isActive: true,
+      isCustomerVisible: true,
       order: 1,
       items: [
         {
@@ -102,6 +111,7 @@ export const DEFAULT_INSPECTION_SETTINGS: Omit<InspectionSettings, 'id' | 'deale
       icon: '🎨',
       color: 'bg-purple-100 text-purple-800 border-purple-200',
       isActive: true,
+      isCustomerVisible: true,
       order: 2,
       items: [
         {
@@ -176,6 +186,7 @@ export const DEFAULT_INSPECTION_SETTINGS: Omit<InspectionSettings, 'id' | 'deale
       icon: '🔧',
       color: 'bg-blue-100 text-blue-800 border-blue-200',
       isActive: true,
+      isCustomerVisible: true,
       order: 3,
       items: [
         {
@@ -250,6 +261,7 @@ export const DEFAULT_INSPECTION_SETTINGS: Omit<InspectionSettings, 'id' | 'deale
       icon: '✨',
       color: 'bg-cyan-100 text-cyan-800 border-cyan-200',
       isActive: true,
+      isCustomerVisible: false, // Hidden from customer by default
       order: 4,
       items: [
         {
@@ -304,6 +316,7 @@ export const DEFAULT_INSPECTION_SETTINGS: Omit<InspectionSettings, 'id' | 'deale
       icon: '📸',
       color: 'bg-orange-100 text-orange-800 border-orange-200',
       isActive: true,
+      isCustomerVisible: false, // Hidden from customer by default
       order: 5,
       items: [
         {
@@ -354,15 +367,15 @@ export const DEFAULT_INSPECTION_SETTINGS: Omit<InspectionSettings, 'id' | 'deale
   ratingLabels: [
     {
       key: 'great',
-      label: 'Great',
+      label: 'Excellent',
       description: 'Excellent condition, no issues',
       color: 'bg-emerald-600 text-white ring-2 ring-emerald-300',
       icon: '⭐'
     },
     {
       key: 'fair',
-      label: 'Fair',
-      description: 'Acceptable condition, minor issues',
+      label: 'Good',
+      description: 'Good condition, minor wear',
       color: 'bg-yellow-600 text-white ring-2 ring-yellow-300',
       icon: '✓'
     },
@@ -375,7 +388,7 @@ export const DEFAULT_INSPECTION_SETTINGS: Omit<InspectionSettings, 'id' | 'deale
     },
     {
       key: 'not-checked',
-      label: 'Not Checked',
+      label: 'Not Inspected',
       description: 'Not yet inspected',
       color: 'bg-gray-500 text-white',
       icon: '?'
@@ -387,5 +400,11 @@ export const DEFAULT_INSPECTION_SETTINGS: Omit<InspectionSettings, 'id' | 'deale
     autoSaveProgress: true,
     showProgressPercentage: true,
     enableTeamNotes: true
+  },
+  customerPdfSettings: {
+    includeVehiclePhotos: false,
+    includeCustomerComments: true,
+    showDetailedRatings: true,
+    footerText: 'This inspection was performed by certified technicians using industry-standard procedures.'
   }
 };

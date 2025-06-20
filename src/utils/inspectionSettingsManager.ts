@@ -232,6 +232,20 @@ export class InspectionSettingsManager {
     return true;
   }
 
+  // Customer PDF Settings Management
+  static updateCustomerPdfSettings(dealershipId: string, updates: Partial<InspectionSettings['customerPdfSettings']>): boolean {
+    const settings = this.getSettings(dealershipId);
+    if (!settings) return false;
+
+    settings.customerPdfSettings = {
+      ...settings.customerPdfSettings,
+      ...updates
+    };
+
+    this.saveSettings(dealershipId, settings);
+    return true;
+  }
+
   // Utility Methods
   static getActiveSection(dealershipId: string): InspectionSection[] {
     const settings = this.getSettings(dealershipId);
