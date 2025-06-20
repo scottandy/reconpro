@@ -38,6 +38,9 @@ const CustomerInspectionPDF: React.FC<CustomerInspectionPDFProps> = ({
 
   useEffect(() => {
     if (dealership && isOpen) {
+      // Initialize default settings first to ensure customerPdfSettings exists
+      InspectionSettingsManager.initializeDefaultSettings(dealership.id);
+      
       // Load inspection settings
       const settings = InspectionSettingsManager.getSettings(dealership.id);
       setInspectionSettings(settings);
