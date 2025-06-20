@@ -174,6 +174,29 @@ const VehicleDetail: React.FC = () => {
     }));
   };
 
+  // 🎯 NEW: Mobile scroll to section functionality
+  const handleMobileSectionClick = (section: string) => {
+    // Set the active filter
+    setActiveFilter(activeFilter === section ? null : section);
+    
+    // Switch to inspection view if not already there
+    if (rightPanelView !== 'inspection') {
+      setRightPanelView('inspection');
+    }
+    
+    // Scroll to the inspection content area on mobile
+    setTimeout(() => {
+      const inspectionElement = document.getElementById('mobile-inspection-content');
+      if (inspectionElement) {
+        inspectionElement.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'start',
+          inline: 'nearest'
+        });
+      }
+    }, 100); // Small delay to ensure state updates are processed
+  };
+
   const getOverallProgress = () => {
     if (!vehicle) return 0;
     const statuses = Object.values(vehicle.status);
@@ -296,10 +319,10 @@ const VehicleDetail: React.FC = () => {
               ></div>
             </div>
 
-            {/* Status Buttons in Two Columns */}
+            {/* Status Buttons in Two Columns - Mobile with Scroll */}
             <div className="grid grid-cols-2 gap-3 mb-6">
               <button
-                onClick={() => setActiveFilter(activeFilter === 'emissions' ? null : 'emissions')}
+                onClick={() => handleMobileSectionClick('emissions')}
                 className={`p-3 rounded-lg border transition-all duration-200 ${
                   activeFilter === 'emissions'
                     ? 'border-green-300 bg-green-50 shadow-md'
@@ -310,7 +333,7 @@ const VehicleDetail: React.FC = () => {
               </button>
               
               <button
-                onClick={() => setActiveFilter(activeFilter === 'cosmetic' ? null : 'cosmetic')}
+                onClick={() => handleMobileSectionClick('cosmetic')}
                 className={`p-3 rounded-lg border transition-all duration-200 ${
                   activeFilter === 'cosmetic'
                     ? 'border-purple-300 bg-purple-50 shadow-md'
@@ -321,7 +344,7 @@ const VehicleDetail: React.FC = () => {
               </button>
               
               <button
-                onClick={() => setActiveFilter(activeFilter === 'mechanical' ? null : 'mechanical')}
+                onClick={() => handleMobileSectionClick('mechanical')}
                 className={`p-3 rounded-lg border transition-all duration-200 ${
                   activeFilter === 'mechanical'
                     ? 'border-blue-300 bg-blue-50 shadow-md'
@@ -332,7 +355,7 @@ const VehicleDetail: React.FC = () => {
               </button>
               
               <button
-                onClick={() => setActiveFilter(activeFilter === 'cleaned' ? null : 'cleaned')}
+                onClick={() => handleMobileSectionClick('cleaned')}
                 className={`p-3 rounded-lg border transition-all duration-200 ${
                   activeFilter === 'cleaned'
                     ? 'border-cyan-300 bg-cyan-50 shadow-md'
@@ -343,7 +366,7 @@ const VehicleDetail: React.FC = () => {
               </button>
               
               <button
-                onClick={() => setActiveFilter(activeFilter === 'photos' ? null : 'photos')}
+                onClick={() => handleMobileSectionClick('photos')}
                 className={`p-3 rounded-lg border transition-all duration-200 col-span-2 ${
                   activeFilter === 'photos'
                     ? 'border-orange-300 bg-orange-50 shadow-md'
@@ -470,21 +493,23 @@ const VehicleDetail: React.FC = () => {
             </div>
           </div>
 
-          {/* Mobile Content */}
-          {rightPanelView === 'inspection' ? (
-            <InspectionChecklist
-              vehicle={vehicle}
-              onStatusUpdate={handleStatusUpdate}
-              onSectionComplete={handleSectionComplete}
-              onAddTeamNote={handleAddTeamNote}
-              activeFilter={activeFilter}
-            />
-          ) : (
-            <TeamNotes
-              notes={vehicle.teamNotes || []}
-              onAddNote={handleAddTeamNote}
-            />
-          )}
+          {/* Mobile Content with ID for scrolling */}
+          <div id="mobile-inspection-content">
+            {rightPanelView === 'inspection' ? (
+              <InspectionChecklist
+                vehicle={vehicle}
+                onStatusUpdate={handleStatusUpdate}
+                onSectionComplete={handleSectionComplete}
+                onAddTeamNote={handleAddTeamNote}
+                activeFilter={activeFilter}
+              />
+            ) : (
+              <TeamNotes
+                notes={vehicle.teamNotes || []}
+                onAddNote={handleAddTeamNote}
+              />
+            )}
+          </div>
 
           {/* Mobile Vehicle Information - At Bottom */}
           <div className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-lg border border-white/20 p-6">
