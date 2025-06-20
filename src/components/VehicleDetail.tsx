@@ -32,7 +32,8 @@ import {
   Wrench,
   Sparkles,
   Camera,
-  Building2
+  Building2,
+  Info
 } from 'lucide-react';
 
 const VehicleDetail: React.FC = () => {
@@ -42,7 +43,9 @@ const VehicleDetail: React.FC = () => {
   const [vehicle, setVehicle] = useState<Vehicle | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
+  const [isEditingNotes, setIsEditingNotes] = useState(false);
   const [editData, setEditData] = useState<Partial<Vehicle>>({});
+  const [editNotes, setEditNotes] = useState('');
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
   const [showSoldModal, setShowSoldModal] = useState(false);
   const [showPendingModal, setShowPendingModal] = useState(false);
@@ -193,6 +196,18 @@ const VehicleDetail: React.FC = () => {
   const handleEditCancel = () => {
     setIsEditing(false);
     setEditData({});
+  };
+
+  const handleEditNotesSave = () => {
+    if (!vehicle) return;
+
+    updateVehicle({ notes: editNotes });
+    setIsEditingNotes(false);
+  };
+
+  const handleEditNotesCancel = () => {
+    setIsEditingNotes(false);
+    setEditNotes('');
   };
 
   const handleSoldVehicle = () => {
@@ -533,61 +548,65 @@ const VehicleDetail: React.FC = () => {
             </div>
           )}
 
-          {/* Vehicle Header Card */}
+          {/* Vehicle Information Card */}
           <div className="bg-white/80 backdrop-blur-sm rounded-xl sm:rounded-2xl shadow-lg border border-white/20 p-4 sm:p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-base sm:text-lg font-bold text-gray-900 flex items-center gap-2">
+                <Info className="w-4 h-4 sm:w-5 sm:h-5" />
+                Vehicle Information
+              </h3>
+              {!isEditing ? (
+                <button
+                  onClick={() => {
+                    setIsEditing(true);
+                    setEditData({
+                      price: vehicle.price,
+                      location: vehicle.location
+                    });
+                  }}
+                  className="inline-flex items-center gap-2 px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
+                >
+                  <Edit3 className="w-4 h-4" />
+                  Edit Details
+                </button>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={handleEditSave}
+                    className="inline-flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                  >
+                    <Save className="w-4 h-4" />
+                    Save
+                  </button>
+                  <button
+                    onClick={handleEditCancel}
+                    className="inline-flex items-center gap-2 px-3 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors text-sm font-medium"
+                  >
+                    <X className="w-4 h-4" />
+                    Cancel
+                  </button>
+                </div>
+              )}
+            </div>
+
             <div className="flex flex-col lg:flex-row lg:items-start gap-4 sm:gap-6">
               {/* Vehicle Info */}
               <div className="flex-1">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 mb-4 sm:mb-6">
-                  <div>
-                    <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-2">
-                      {vehicle.year} {vehicle.make} {vehicle.model}
-                      {vehicle.trim && <span className="text-gray-600 ml-2">{vehicle.trim}</span>}
-                    </h2>
-                    {readyForSale && (
-                      <div className="inline-flex items-center gap-1 px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-sm font-semibold border border-emerald-200">
-                        <CheckCircle2 className="w-4 h-4" />
-                        Ready for Sale
-                      </div>
-                    )}
-                  </div>
-                  {!isEditing ? (
-                    <button
-                      onClick={() => {
-                        setIsEditing(true);
-                        setEditData({
-                          price: vehicle.price,
-                          location: vehicle.location,
-                          notes: vehicle.notes || ''
-                        });
-                      }}
-                      className="inline-flex items-center gap-2 px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
-                    >
-                      <Edit3 className="w-4 h-4" />
-                      Edit Details
-                    </button>
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={handleEditSave}
-                        className="inline-flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
-                      >
-                        <Save className="w-4 h-4" />
-                        Save
-                      </button>
-                      <button
-                        onClick={handleEditCancel}
-                        className="inline-flex items-center gap-2 px-3 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors text-sm font-medium"
-                      >
-                        <X className="w-4 h-4" />
-                        Cancel
-                      </button>
+                <div className="mb-4">
+                  <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-2">
+                    {vehicle.year} {vehicle.make} {vehicle.model}
+                    {vehicle.trim && <span className="text-gray-600 ml-2">{vehicle.trim}</span>}
+                  </h2>
+                  {readyForSale && (
+                    <div className="inline-flex items-center gap-1 px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-sm font-semibold border border-emerald-200">
+                      <CheckCircle2 className="w-4 h-4" />
+                      Ready for Sale
                     </div>
                   )}
                 </div>
 
                 {/* Vehicle Details Grid */}
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 mb-6">
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
                   <div className="flex items-center gap-2">
                     <div className="w-8 h-8 bg-gray-100 rounded-lg flex items-center justify-center">
                       <Hash className="w-4 h-4 text-gray-600" />
@@ -676,129 +695,162 @@ const VehicleDetail: React.FC = () => {
                     </div>
                   </div>
                 </div>
+              </div>
+            </div>
+          </div>
 
-                {/* Notes Section */}
-                <div className="mb-6">
-                  <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-3 flex items-center gap-2">
-                    <FileText className="w-4 h-4 sm:w-5 sm:h-5" />
-                    Vehicle Notes
-                  </h3>
-                  
-                  {isEditing ? (
-                    <textarea
-                      value={editData.notes}
-                      onChange={(e) => setEditData({ ...editData, notes: e.target.value })}
-                      placeholder="Add notes about this vehicle..."
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-sm"
-                      rows={3}
-                    />
-                  ) : (
-                    <>
-                      {/* Summary Notes */}
-                      {summaryNotes.length > 0 && (
-                        <div className="space-y-2 mb-3">
-                          {summaryNotes.map(note => (
-                            <div key={note.id} className="p-3 bg-indigo-50/80 rounded-lg border border-indigo-200/60">
-                              <div className="flex items-start gap-2">
-                                <div className="w-4 h-4 bg-indigo-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                                  <FileText className="w-2.5 h-2.5 text-indigo-600" />
-                                </div>
-                                <div>
-                                  <p className="text-sm text-indigo-900 font-medium">{note.text}</p>
-                                  <div className="flex items-center gap-2 mt-1 text-xs text-indigo-600">
-                                    <span>{note.userInitials}</span>
-                                    <span>•</span>
-                                    <span>{new Date(note.timestamp).toLocaleDateString()}</span>
-                                  </div>
-                                </div>
+          {/* Reconditioning Progress Card */}
+          <div className="bg-white/80 backdrop-blur-sm rounded-xl sm:rounded-2xl shadow-lg border border-white/20 p-4 sm:p-6">
+            <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-3">Reconditioning Progress</h3>
+            
+            {/* Progress Bar */}
+            <div className="mb-3">
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-sm font-medium text-gray-700">Overall Completion</span>
+                <span className="text-sm font-bold text-gray-900">{Math.round(progress)}%</span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2.5">
+                <div 
+                  className={`h-2.5 rounded-full transition-all duration-500 ${
+                    progress === 100 
+                      ? 'bg-gradient-to-r from-emerald-500 to-green-600' 
+                      : 'bg-gradient-to-r from-blue-500 to-indigo-600'
+                  }`}
+                  style={{ width: `${progress}%` }}
+                ></div>
+              </div>
+            </div>
+
+            {/* Status Badges */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 mb-6">
+              {Object.entries(vehicle.status).map(([section, status]) => {
+                const SectionIcon = getSectionIcon(section);
+                
+                return (
+                  <button
+                    key={section}
+                    onClick={() => setActiveFilter(activeFilter === section ? null : section)}
+                    className={`flex items-center justify-between p-3 rounded-lg border transition-all duration-200 ${
+                      activeFilter === section
+                        ? 'bg-blue-50 border-blue-300 ring-2 ring-blue-200'
+                        : status === 'completed'
+                          ? 'bg-emerald-50/50 border-emerald-200/60 hover:bg-emerald-50'
+                          : status === 'needs-attention'
+                            ? 'bg-red-50/50 border-red-200/60 hover:bg-red-50'
+                            : status === 'pending'
+                              ? 'bg-yellow-50/50 border-yellow-200/60 hover:bg-yellow-50'
+                              : 'bg-gray-50/50 border-gray-200/60 hover:bg-gray-50'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                        status === 'completed' ? 'bg-emerald-100' :
+                        status === 'needs-attention' ? 'bg-red-100' :
+                        status === 'pending' ? 'bg-yellow-100' :
+                        'bg-gray-100'
+                      }`}>
+                        <SectionIcon className={`w-4 h-4 ${
+                          status === 'completed' ? 'text-emerald-600' :
+                          status === 'needs-attention' ? 'text-red-600' :
+                          status === 'pending' ? 'text-yellow-600' :
+                          'text-gray-600'
+                        }`} />
+                      </div>
+                      <span className="font-medium text-gray-900">{getSectionLabel(section)}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      {activeFilter === section ? (
+                        <Eye className="w-4 h-4 text-blue-600" />
+                      ) : (
+                        <Filter className="w-4 h-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Vehicle Notes Section */}
+            <div className="mt-6 border-t border-gray-200 pt-4">
+              <div className="flex items-center justify-between mb-3">
+                <h4 className="text-base font-bold text-gray-900 flex items-center gap-2">
+                  <FileText className="w-4 h-4" />
+                  Vehicle Notes
+                </h4>
+                {!isEditingNotes ? (
+                  <button
+                    onClick={() => {
+                      setIsEditingNotes(true);
+                      setEditNotes(vehicle.notes || '');
+                    }}
+                    className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors text-xs font-medium"
+                  >
+                    <Edit3 className="w-3 h-3" />
+                    Edit
+                  </button>
+                ) : (
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={handleEditNotesSave}
+                      className="inline-flex items-center gap-1 px-2 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-xs font-medium"
+                    >
+                      <Save className="w-3 h-3" />
+                      Save
+                    </button>
+                    <button
+                      onClick={handleEditNotesCancel}
+                      className="inline-flex items-center gap-1 px-2 py-1 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors text-xs font-medium"
+                    >
+                      <X className="w-3 h-3" />
+                      Cancel
+                    </button>
+                  </div>
+                )}
+              </div>
+              
+              {isEditingNotes ? (
+                <textarea
+                  value={editNotes}
+                  onChange={(e) => setEditNotes(e.target.value)}
+                  placeholder="Add notes about this vehicle..."
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-sm"
+                  rows={3}
+                />
+              ) : (
+                <>
+                  {/* Summary Notes */}
+                  {summaryNotes.length > 0 && (
+                    <div className="space-y-2 mb-3">
+                      {summaryNotes.map(note => (
+                        <div key={note.id} className="p-3 bg-indigo-50/80 rounded-lg border border-indigo-200/60">
+                          <div className="flex items-start gap-2">
+                            <div className="w-4 h-4 bg-indigo-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                              <FileText className="w-2.5 h-2.5 text-indigo-600" />
+                            </div>
+                            <div>
+                              <p className="text-sm text-indigo-900 font-medium">{note.text}</p>
+                              <div className="flex items-center gap-2 mt-1 text-xs text-indigo-600">
+                                <span>{note.userInitials}</span>
+                                <span>•</span>
+                                <span>{new Date(note.timestamp).toLocaleDateString()}</span>
                               </div>
                             </div>
-                          ))}
+                          </div>
                         </div>
-                      )}
-                      
-                      {/* Regular Notes */}
-                      {vehicle.notes ? (
-                        <div className="p-3 bg-amber-50/80 rounded-lg border border-amber-200/60">
-                          <p className="text-sm text-amber-800 font-medium">{vehicle.notes}</p>
-                        </div>
-                      ) : (
-                        <p className="text-sm text-gray-500 italic">No notes available for this vehicle.</p>
-                      )}
-                    </>
+                      ))}
+                    </div>
                   )}
-                </div>
-
-                {/* Progress Section */}
-                <div>
-                  <h3 className="text-base sm:text-lg font-bold text-gray-900 mb-3">Reconditioning Progress</h3>
-                  <div className="mb-3">
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-sm font-medium text-gray-700">Overall Completion</span>
-                      <span className="text-sm font-bold text-gray-900">{Math.round(progress)}%</span>
+                  
+                  {/* Regular Notes */}
+                  {vehicle.notes ? (
+                    <div className="p-3 bg-amber-50/80 rounded-lg border border-amber-200/60">
+                      <p className="text-sm text-amber-800 font-medium">{vehicle.notes}</p>
                     </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2.5">
-                      <div 
-                        className={`h-2.5 rounded-full transition-all duration-500 ${
-                          progress === 100 
-                            ? 'bg-gradient-to-r from-emerald-500 to-green-600' 
-                            : 'bg-gradient-to-r from-blue-500 to-indigo-600'
-                        }`}
-                        style={{ width: `${progress}%` }}
-                      ></div>
-                    </div>
-                  </div>
-
-                  {/* Status Badges */}
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
-                    {Object.entries(vehicle.status).map(([section, status]) => {
-                      const SectionIcon = getSectionIcon(section);
-                      
-                      return (
-                        <button
-                          key={section}
-                          onClick={() => setActiveFilter(activeFilter === section ? null : section)}
-                          className={`flex items-center justify-between p-3 rounded-lg border transition-all duration-200 ${
-                            activeFilter === section
-                              ? 'bg-blue-50 border-blue-300 ring-2 ring-blue-200'
-                              : status === 'completed'
-                                ? 'bg-emerald-50/50 border-emerald-200/60 hover:bg-emerald-50'
-                                : status === 'needs-attention'
-                                  ? 'bg-red-50/50 border-red-200/60 hover:bg-red-50'
-                                  : status === 'pending'
-                                    ? 'bg-yellow-50/50 border-yellow-200/60 hover:bg-yellow-50'
-                                    : 'bg-gray-50/50 border-gray-200/60 hover:bg-gray-50'
-                          }`}
-                        >
-                          <div className="flex items-center gap-2">
-                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
-                              status === 'completed' ? 'bg-emerald-100' :
-                              status === 'needs-attention' ? 'bg-red-100' :
-                              status === 'pending' ? 'bg-yellow-100' :
-                              'bg-gray-100'
-                            }`}>
-                              <SectionIcon className={`w-4 h-4 ${
-                                status === 'completed' ? 'text-emerald-600' :
-                                status === 'needs-attention' ? 'text-red-600' :
-                                status === 'pending' ? 'text-yellow-600' :
-                                'text-gray-600'
-                              }`} />
-                            </div>
-                            <span className="font-medium text-gray-900">{getSectionLabel(section)}</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            {activeFilter === section ? (
-                              <Eye className="w-4 h-4 text-blue-600" />
-                            ) : (
-                              <Filter className="w-4 h-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
-                            )}
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
+                  ) : (
+                    <p className="text-sm text-gray-500 italic">No notes available for this vehicle.</p>
+                  )}
+                </>
+              )}
             </div>
           </div>
 
