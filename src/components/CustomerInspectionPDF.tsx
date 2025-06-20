@@ -37,6 +37,7 @@ const CustomerInspectionPDF: React.FC<CustomerInspectionPDFProps> = ({
   const [pdfHtml, setPdfHtml] = useState<string>('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [lastRefreshed, setLastRefreshed] = useState<Date>(new Date());
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (dealership && isOpen) {
@@ -111,11 +112,12 @@ const CustomerInspectionPDF: React.FC<CustomerInspectionPDFProps> = ({
 
   const generatePdfPreview = () => {
     if (!dealership || !inspectionSettings) {
-      console.error('Cannot generate PDF: Missing dealership or inspection settings');
+      setError('Cannot generate PDF: Missing dealership or inspection settings');
       return;
     }
     
     setIsGenerating(true);
+    setError(null);
     
     try {
       // Get dealership info
@@ -140,7 +142,7 @@ const CustomerInspectionPDF: React.FC<CustomerInspectionPDFProps> = ({
       setPdfHtml(html);
     } catch (error) {
       console.error('Error generating PDF:', error);
-      alert(`Error generating PDF: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      setError(`Error generating PDF: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setIsGenerating(false);
     }
@@ -251,6 +253,20 @@ const CustomerInspectionPDF: React.FC<CustomerInspectionPDFProps> = ({
                   <div className="text-center">
                     <div className="w-10 h-10 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
                     <p className="text-gray-600">Generating PDF preview...</p>
+                  </div>
+                </div>
+              ) : error ? (
+                <div className="flex items-center justify-center h-full">
+                  <div className="text-center max-w-md">
+                    <AlertTriangle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Error Generating PDF</h3>
+                    <p className="text-gray-600 mb-4">{error}</p>
+                    <button 
+                      onClick={handleManualRefresh}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    >
+                      Try Again
+                    </button>
                   </div>
                 </div>
               ) : pdfHtml ? (

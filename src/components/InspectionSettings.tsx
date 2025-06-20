@@ -27,7 +27,8 @@ import {
   Circle,
   Copy,
   Move,
-  FileText
+  FileText,
+  Image
 } from 'lucide-react';
 
 interface SectionModalProps {
@@ -284,9 +285,7 @@ const SectionModal: React.FC<SectionModalProps> = ({ section, isOpen, onClose, o
                   onChange={(e) => setFormData(prev => ({ ...prev, isCustomerVisible: e.target.checked }))}
                   className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                 />
-                <span className="text-sm font-medium text-gray-700">
-                  Show in customer PDF
-                </span>
+                <span className="text-sm font-medium text-gray-700">Visible in customer PDF</span>
               </label>
             </div>
           </div>
@@ -299,12 +298,12 @@ const SectionModal: React.FC<SectionModalProps> = ({ section, isOpen, onClose, o
               <span>{formData.label || 'Section Name'}</span>
             </div>
             {formData.isCustomerVisible ? (
-              <div className="mt-2 flex items-center gap-1 text-xs text-green-600">
-                <FileText className="w-3 h-3" />
+              <div className="mt-2 text-xs text-green-600 flex items-center gap-1">
+                <Eye className="w-3 h-3" />
                 <span>Will appear in customer PDF</span>
               </div>
             ) : (
-              <div className="mt-2 flex items-center gap-1 text-xs text-gray-500">
+              <div className="mt-2 text-xs text-gray-500 flex items-center gap-1">
                 <EyeOff className="w-3 h-3" />
                 <span>Hidden from customer PDF</span>
               </div>
@@ -500,114 +499,6 @@ const ItemModal: React.FC<ItemModalProps> = ({ item, isOpen, onClose, onSave, ex
   );
 };
 
-// New component for Customer PDF Settings
-const CustomerPDFSettingsPanel: React.FC<{
-  settings: InspectionSettingsType;
-  onUpdate: (updates: Partial<InspectionSettingsType['customerPdfSettings']>) => void;
-}> = ({ settings, onUpdate }) => {
-  const [formData, setFormData] = useState({
-    includeVehiclePhotos: settings.customerPdfSettings?.includeVehiclePhotos || false,
-    includeCustomerComments: settings.customerPdfSettings?.includeCustomerComments || true,
-    showDetailedRatings: settings.customerPdfSettings?.showDetailedRatings || true,
-    footerText: settings.customerPdfSettings?.footerText || ''
-  });
-
-  useEffect(() => {
-    setFormData({
-      includeVehiclePhotos: settings.customerPdfSettings?.includeVehiclePhotos || false,
-      includeCustomerComments: settings.customerPdfSettings?.includeCustomerComments || true,
-      showDetailedRatings: settings.customerPdfSettings?.showDetailedRatings || true,
-      footerText: settings.customerPdfSettings?.footerText || ''
-    });
-  }, [settings]);
-
-  const handleChange = (field: string, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-  };
-
-  const handleSave = () => {
-    onUpdate(formData);
-  };
-
-  return (
-    <div className="bg-white/70 backdrop-blur-sm rounded-xl shadow-lg border border-white/20 p-6">
-      <h3 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
-        <FileText className="w-5 h-5" />
-        Customer PDF Settings
-      </h3>
-      
-      <div className="space-y-6">
-        <div className="space-y-4">
-          <label className="flex items-center justify-between p-4 bg-gray-50/80 rounded-lg border border-gray-200/60">
-            <div>
-              <span className="font-medium text-gray-900">Include Vehicle Photos</span>
-              <p className="text-sm text-gray-600">Show vehicle photos in the PDF report</p>
-            </div>
-            <input
-              type="checkbox"
-              checked={formData.includeVehiclePhotos}
-              onChange={(e) => handleChange('includeVehiclePhotos', e.target.checked)}
-              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-            />
-          </label>
-
-          <label className="flex items-center justify-between p-4 bg-gray-50/80 rounded-lg border border-gray-200/60">
-            <div>
-              <span className="font-medium text-gray-900">Include Customer Comments</span>
-              <p className="text-sm text-gray-600">Show customer comments in the PDF report</p>
-            </div>
-            <input
-              type="checkbox"
-              checked={formData.includeCustomerComments}
-              onChange={(e) => handleChange('includeCustomerComments', e.target.checked)}
-              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-            />
-          </label>
-
-          <label className="flex items-center justify-between p-4 bg-gray-50/80 rounded-lg border border-gray-200/60">
-            <div>
-              <span className="font-medium text-gray-900">Show Detailed Ratings</span>
-              <p className="text-sm text-gray-600">Display detailed rating information for each item</p>
-            </div>
-            <input
-              type="checkbox"
-              checked={formData.showDetailedRatings}
-              onChange={(e) => handleChange('showDetailedRatings', e.target.checked)}
-              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-            />
-          </label>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Footer Text
-          </label>
-          <textarea
-            value={formData.footerText}
-            onChange={(e) => handleChange('footerText', e.target.value)}
-            placeholder="Enter text to appear in the footer of the PDF report..."
-            rows={3}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-          />
-          <p className="text-xs text-gray-500 mt-1">
-            This text will appear at the bottom of every customer PDF report
-          </p>
-        </div>
-
-        <div className="pt-4 border-t border-gray-200/60">
-          <button
-            onClick={handleSave}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
-          >
-            <Save className="w-4 h-4" />
-            Save PDF Settings
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
-
 const InspectionSettings: React.FC = () => {
   const { dealership, user } = useAuth();
   const [settings, setSettings] = useState<InspectionSettingsType | null>(null);
@@ -744,7 +635,6 @@ const InspectionSettings: React.FC = () => {
     
     InspectionSettingsManager.updateCustomerPdfSettings(dealership.id, updates);
     loadSettings();
-    alert('Customer PDF settings saved successfully!');
   };
 
   const handleResetToDefaults = () => {
@@ -919,17 +809,6 @@ const InspectionSettings: React.FC = () => {
             Rating Labels
           </button>
           <button
-            onClick={() => setActiveTab('pdf')}
-            className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold transition-all duration-200 ${
-              activeTab === 'pdf'
-                ? 'bg-white text-blue-600 shadow-md border border-blue-100'
-                : 'text-gray-600 hover:text-gray-900 hover:bg-white/50'
-            }`}
-          >
-            <FileText className="w-5 h-5" />
-            PDF Settings
-          </button>
-          <button
             onClick={() => setActiveTab('global')}
             className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold transition-all duration-200 ${
               activeTab === 'global'
@@ -939,6 +818,17 @@ const InspectionSettings: React.FC = () => {
           >
             <Settings className="w-5 h-5" />
             Global Settings
+          </button>
+          <button
+            onClick={() => setActiveTab('pdf')}
+            className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold transition-all duration-200 ${
+              activeTab === 'pdf'
+                ? 'bg-white text-blue-600 shadow-md border border-blue-100'
+                : 'text-gray-600 hover:text-gray-900 hover:bg-white/50'
+            }`}
+          >
+            <FileText className="w-5 h-5" />
+            PDF Settings
           </button>
         </div>
       </div>
@@ -990,10 +880,15 @@ const InspectionSettings: React.FC = () => {
                             Inactive
                           </span>
                         )}
-                        {!section.isCustomerVisible && (
+                        {section.isCustomerVisible ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
+                            <Eye className="w-3 h-3" />
+                            Customer Visible
+                          </span>
+                        ) : (
                           <span className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-medium">
                             <EyeOff className="w-3 h-3" />
-                            Hidden from PDF
+                            Hidden from Customer
                           </span>
                         )}
                       </div>
@@ -1018,7 +913,7 @@ const InspectionSettings: React.FC = () => {
                           }`}
                           title={section.isCustomerVisible ? 'Hide from customer PDF' : 'Show in customer PDF'}
                         >
-                          {section.isCustomerVisible ? <FileText className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                          {section.isCustomerVisible ? <FileText className="w-4 h-4" /> : <FileText className="w-4 h-4" />}
                         </button>
                         <button
                           onClick={() => setEditingSection(section)}
@@ -1184,13 +1079,6 @@ const InspectionSettings: React.FC = () => {
         </div>
       )}
 
-      {activeTab === 'pdf' && (
-        <CustomerPDFSettingsPanel 
-          settings={settings}
-          onUpdate={handleUpdateCustomerPdfSettings}
-        />
-      )}
-
       {activeTab === 'global' && (
         <div className="bg-white/70 backdrop-blur-sm rounded-xl shadow-lg border border-white/20 p-6">
           <h3 className="text-lg font-bold text-gray-900 mb-6">Global Inspection Settings</h3>
@@ -1303,6 +1191,157 @@ const InspectionSettings: React.FC = () => {
                     className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                   />
                 </label>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'pdf' && (
+        <div className="bg-white/70 backdrop-blur-sm rounded-xl shadow-lg border border-white/20 p-6">
+          <h3 className="text-lg font-bold text-gray-900 mb-6">Customer PDF Settings</h3>
+          <p className="text-gray-600 mb-6">Configure how inspection reports appear to customers.</p>
+          
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <h4 className="font-medium text-gray-900">Content Options</h4>
+                
+                <label className="flex items-center justify-between p-4 bg-gray-50/80 rounded-lg border border-gray-200/60">
+                  <div>
+                    <span className="font-medium text-gray-900">Include Vehicle Photos</span>
+                    <p className="text-sm text-gray-600">Add vehicle photos to the PDF report</p>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={settings.customerPdfSettings?.includeVehiclePhotos || false}
+                    onChange={(e) => {
+                      if (dealership) {
+                        handleUpdateCustomerPdfSettings({
+                          includeVehiclePhotos: e.target.checked
+                        });
+                      }
+                    }}
+                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                </label>
+
+                <label className="flex items-center justify-between p-4 bg-gray-50/80 rounded-lg border border-gray-200/60">
+                  <div>
+                    <span className="font-medium text-gray-900">Include Customer Comments</span>
+                    <p className="text-sm text-gray-600">Show customer comments in the PDF</p>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={settings.customerPdfSettings?.includeCustomerComments || false}
+                    onChange={(e) => {
+                      if (dealership) {
+                        handleUpdateCustomerPdfSettings({
+                          includeCustomerComments: e.target.checked
+                        });
+                      }
+                    }}
+                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                </label>
+
+                <label className="flex items-center justify-between p-4 bg-gray-50/80 rounded-lg border border-gray-200/60">
+                  <div>
+                    <span className="font-medium text-gray-900">Show Detailed Ratings</span>
+                    <p className="text-sm text-gray-600">Display detailed rating information for each item</p>
+                  </div>
+                  <input
+                    type="checkbox"
+                    checked={settings.customerPdfSettings?.showDetailedRatings || false}
+                    onChange={(e) => {
+                      if (dealership) {
+                        handleUpdateCustomerPdfSettings({
+                          showDetailedRatings: e.target.checked
+                        });
+                      }
+                    }}
+                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  />
+                </label>
+              </div>
+
+              <div className="space-y-4">
+                <h4 className="font-medium text-gray-900">Branding & Customization</h4>
+                
+                <div className="p-4 bg-gray-50/80 rounded-lg border border-gray-200/60">
+                  <label className="block font-medium text-gray-900 mb-2">
+                    Company Logo URL
+                  </label>
+                  <input
+                    type="text"
+                    value={settings.customerPdfSettings?.companyLogo || ''}
+                    onChange={(e) => {
+                      if (dealership) {
+                        handleUpdateCustomerPdfSettings({
+                          companyLogo: e.target.value
+                        });
+                      }
+                    }}
+                    placeholder="https://example.com/logo.png"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Enter a URL to your company logo</p>
+                </div>
+
+                <div className="p-4 bg-gray-50/80 rounded-lg border border-gray-200/60">
+                  <label className="block font-medium text-gray-900 mb-2">
+                    Footer Text
+                  </label>
+                  <textarea
+                    value={settings.customerPdfSettings?.footerText || ''}
+                    onChange={(e) => {
+                      if (dealership) {
+                        handleUpdateCustomerPdfSettings({
+                          footerText: e.target.value
+                        });
+                      }
+                    }}
+                    placeholder="Enter footer text for the PDF report..."
+                    rows={3}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+              <h4 className="font-medium text-blue-900 mb-2 flex items-center gap-2">
+                <Eye className="w-4 h-4" />
+                Section Visibility
+              </h4>
+              <p className="text-sm text-blue-700 mb-4">
+                Control which sections appear in the customer PDF by toggling the "Customer Visible" setting for each section.
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                {settings.sections
+                  .filter(section => section.isActive)
+                  .sort((a, b) => a.order - b.order)
+                  .map(section => (
+                    <div key={section.id} className="flex items-center justify-between p-3 bg-white rounded-lg border border-blue-100">
+                      <div className="flex items-center gap-2">
+                        <div className={`w-6 h-6 rounded-full flex items-center justify-center ${section.color.split(' ')[0]}`}>
+                          <span className="text-xs">{section.icon}</span>
+                        </div>
+                        <span className="text-sm font-medium">{section.label}</span>
+                      </div>
+                      <button
+                        onClick={() => handleToggleSectionCustomerVisible(section.id)}
+                        className={`p-1.5 rounded-lg transition-colors ${
+                          section.isCustomerVisible
+                            ? 'text-green-600 hover:bg-green-50'
+                            : 'text-gray-400 hover:bg-gray-50'
+                        }`}
+                        title={section.isCustomerVisible ? 'Hide from customer PDF' : 'Show in customer PDF'}
+                      >
+                        {section.isCustomerVisible ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
+                      </button>
+                    </div>
+                  ))}
               </div>
             </div>
           </div>
