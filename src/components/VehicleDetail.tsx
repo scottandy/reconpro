@@ -377,42 +377,42 @@ const VehicleDetail: React.FC = () => {
               </button>
             </div>
 
-            {/* Vehicle Notes Section */}
+            {/* Vehicle Notes Section - SMALLER HEADER */}
             {(vehicle.notes || summaryNotes.length > 0 || isEditingNotes) && (
-              <div className="border-t border-gray-200/60 pt-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                    <FileText className="w-5 h-5" />
+              <div className="border-t border-gray-200/60 pt-4">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-xs font-medium text-gray-700 flex items-center gap-1">
+                    <FileText className="w-3 h-3" />
                     Vehicle Notes
                   </h3>
                   {!isEditingNotes && (
                     <button
                       onClick={() => setIsEditingNotes(true)}
-                      className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                      className="p-1 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                       title="Edit Notes"
                     >
-                      <Edit3 className="w-4 h-4" />
+                      <Edit3 className="w-3 h-3" />
                     </button>
                   )}
                 </div>
 
                 {/* Summary Notes from Team Notes */}
                 {summaryNotes.length > 0 && (
-                  <div className="space-y-3 mb-4">
+                  <div className="space-y-2 mb-3">
                     {summaryNotes.map((note) => (
-                      <div key={note.id} className="p-4 bg-indigo-50/80 backdrop-blur-sm rounded-lg border border-indigo-200/60">
-                        <div className="flex items-start gap-3">
-                          <div className="w-6 h-6 bg-indigo-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                            <FileText className="w-3 h-3 text-indigo-600" />
+                      <div key={note.id} className="p-3 bg-indigo-50/80 backdrop-blur-sm rounded-lg border border-indigo-200/60">
+                        <div className="flex items-start gap-2">
+                          <div className="w-4 h-4 bg-indigo-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <FileText className="w-2 h-2 text-indigo-600" />
                           </div>
                           <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-2">
-                              <span className="text-sm font-semibold text-indigo-800">{note.userInitials}</span>
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="text-xs font-semibold text-indigo-800">{note.userInitials}</span>
                               <span className="text-xs text-indigo-600">
                                 {new Date(note.timestamp).toLocaleDateString()}
                               </span>
                             </div>
-                            <p className="text-sm text-indigo-900 font-medium leading-relaxed">{note.text}</p>
+                            <p className="text-xs text-indigo-900 font-medium leading-relaxed">{note.text}</p>
                           </div>
                         </div>
                       </div>
@@ -448,17 +448,17 @@ const VehicleDetail: React.FC = () => {
                     </div>
                   </div>
                 ) : vehicle.notes ? (
-                  <div className="p-4 bg-amber-50/80 backdrop-blur-sm rounded-lg border border-amber-200/60">
-                    <div className="flex items-start gap-3">
-                      <div className="w-5 h-5 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <AlertTriangle className="w-3 h-3 text-amber-600" />
+                  <div className="p-3 bg-amber-50/80 backdrop-blur-sm rounded-lg border border-amber-200/60">
+                    <div className="flex items-start gap-2">
+                      <div className="w-4 h-4 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <AlertTriangle className="w-2 h-2 text-amber-600" />
                       </div>
-                      <p className="text-sm text-amber-800 font-medium leading-relaxed">{vehicle.notes}</p>
+                      <p className="text-xs text-amber-800 font-medium leading-relaxed">{vehicle.notes}</p>
                     </div>
                   </div>
                 ) : (
-                  <div className="p-4 bg-gray-50/80 backdrop-blur-sm rounded-lg border border-gray-200/60 text-center">
-                    <p className="text-sm text-gray-600">No notes added yet</p>
+                  <div className="p-3 bg-gray-50/80 backdrop-blur-sm rounded-lg border border-gray-200/60 text-center">
+                    <p className="text-xs text-gray-600">No notes added yet</p>
                   </div>
                 )}
               </div>
@@ -675,42 +675,42 @@ const VehicleDetail: React.FC = () => {
                 </button>
               </div>
 
-              {/* Vehicle Notes Section */}
+              {/* Vehicle Notes Section - SMALLER HEADER */}
               {(vehicle.notes || summaryNotes.length > 0 || isEditingNotes) && (
-                <div className="border-t border-gray-200/60 pt-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                      <FileText className="w-5 h-5" />
+                <div className="border-t border-gray-200/60 pt-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <h3 className="text-xs font-medium text-gray-700 flex items-center gap-1">
+                      <FileText className="w-3 h-3" />
                       Vehicle Notes
                     </h3>
                     {!isEditingNotes && (
                       <button
                         onClick={() => setIsEditingNotes(true)}
-                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                        className="p-1 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                         title="Edit Notes"
                       >
-                        <Edit3 className="w-4 h-4" />
+                        <Edit3 className="w-3 h-3" />
                       </button>
                     )}
                   </div>
 
                   {/* Summary Notes from Team Notes */}
                   {summaryNotes.length > 0 && (
-                    <div className="space-y-3 mb-4">
+                    <div className="space-y-2 mb-3">
                       {summaryNotes.map((note) => (
-                        <div key={note.id} className="p-4 bg-indigo-50/80 backdrop-blur-sm rounded-lg border border-indigo-200/60">
-                          <div className="flex items-start gap-3">
-                            <div className="w-6 h-6 bg-indigo-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                              <FileText className="w-3 h-3 text-indigo-600" />
+                        <div key={note.id} className="p-3 bg-indigo-50/80 backdrop-blur-sm rounded-lg border border-indigo-200/60">
+                          <div className="flex items-start gap-2">
+                            <div className="w-4 h-4 bg-indigo-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                              <FileText className="w-2 h-2 text-indigo-600" />
                             </div>
                             <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-2">
-                                <span className="text-sm font-semibold text-indigo-800">{note.userInitials}</span>
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="text-xs font-semibold text-indigo-800">{note.userInitials}</span>
                                 <span className="text-xs text-indigo-600">
                                   {new Date(note.timestamp).toLocaleDateString()}
                                 </span>
                               </div>
-                              <p className="text-sm text-indigo-900 font-medium leading-relaxed">{note.text}</p>
+                              <p className="text-xs text-indigo-900 font-medium leading-relaxed">{note.text}</p>
                             </div>
                           </div>
                         </div>
@@ -746,17 +746,17 @@ const VehicleDetail: React.FC = () => {
                       </div>
                     </div>
                   ) : vehicle.notes ? (
-                    <div className="p-4 bg-amber-50/80 backdrop-blur-sm rounded-lg border border-amber-200/60">
-                      <div className="flex items-start gap-3">
-                        <div className="w-5 h-5 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
-                          <AlertTriangle className="w-3 h-3 text-amber-600" />
+                    <div className="p-3 bg-amber-50/80 backdrop-blur-sm rounded-lg border border-amber-200/60">
+                      <div className="flex items-start gap-2">
+                        <div className="w-4 h-4 bg-amber-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                          <AlertTriangle className="w-2 h-2 text-amber-600" />
                         </div>
-                        <p className="text-sm text-amber-800 font-medium leading-relaxed">{vehicle.notes}</p>
+                        <p className="text-xs text-amber-800 font-medium leading-relaxed">{vehicle.notes}</p>
                       </div>
                     </div>
                   ) : (
-                    <div className="p-4 bg-gray-50/80 backdrop-blur-sm rounded-lg border border-gray-200/60 text-center">
-                      <p className="text-sm text-gray-600">No notes added yet</p>
+                    <div className="p-3 bg-gray-50/80 backdrop-blur-sm rounded-lg border border-gray-200/60 text-center">
+                      <p className="text-xs text-gray-600">No notes added yet</p>
                     </div>
                   )}
                 </div>
