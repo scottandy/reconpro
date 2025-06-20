@@ -39,6 +39,10 @@ const VehicleDetail: React.FC = () => {
   const [isEditingNotes, setIsEditingNotes] = useState(false);
   const [editedNotes, setEditedNotes] = useState('');
   const [rightPanelView, setRightPanelView] = useState<'inspection' | 'team-notes'>('inspection');
+  
+  // NEW: Location editing state
+  const [isEditingLocation, setIsEditingLocation] = useState(false);
+  const [editedLocation, setEditedLocation] = useState('');
 
   useEffect(() => {
     if (id) {
@@ -81,6 +85,7 @@ const VehicleDetail: React.FC = () => {
     
     if (foundVehicle) {
       setEditedNotes(foundVehicle.notes || '');
+      setEditedLocation(foundVehicle.location);
     }
     
     setIsLoading(false);
@@ -161,6 +166,46 @@ const VehicleDetail: React.FC = () => {
     setIsEditingNotes(false);
   };
 
+  // NEW: Location update handlers
+  const handleSaveLocation = () => {
+    if (!vehicle || !user) return;
+
+    const oldLocation = vehicle.location;
+    const newLocation = editedLocation.trim();
+    
+    if (oldLocation === newLocation) {
+      setIsEditingLocation(false);
+      return;
+    }
+
+    const updatedVehicle = {
+      ...vehicle,
+      location: newLocation,
+      locationChangedBy: user.initials,
+      locationChangedDate: new Date().toISOString()
+    };
+
+    // Add team note about location change
+    const locationNote: TeamNote = {
+      id: Date.now().toString(),
+      text: `Vehicle location changed from "${oldLocation}" to "${newLocation}".`,
+      userInitials: user.initials,
+      timestamp: new Date().toISOString(),
+      category: 'general'
+    };
+
+    updatedVehicle.teamNotes = [locationNote, ...(vehicle.teamNotes || [])];
+
+    setVehicle(updatedVehicle);
+    saveVehicleUpdate(updatedVehicle);
+    setIsEditingLocation(false);
+  };
+
+  const handleCancelEditLocation = () => {
+    setEditedLocation(vehicle?.location || '');
+    setIsEditingLocation(false);
+  };
+
   const saveVehicleUpdate = (updatedVehicle: Vehicle) => {
     const savedUpdates = localStorage.getItem('vehicleUpdates');
     const updates = savedUpdates ? JSON.parse(savedUpdates) : {};
@@ -229,6 +274,39 @@ const VehicleDetail: React.FC = () => {
     return vehicle.teamNotes.filter(note => note.category === 'summary');
   };
 
+  // NEW: Get location style for visual indication
+  const getLocationStyle = (location: string) => {
+    const locationLower = location.toLowerCase();
+    
+    // Check for RED indicators (Transit/Transport)
+    if (locationLower.includes('transit') ||
+        locationLower.includes('transport')) {
+      return {
+        bgColor: 'bg-red-100',
+        textColor: 'text-red-800',
+        borderColor: 'border-red-200'
+      };
+    }
+    
+    // Check for YELLOW indicators (Off-site)
+    if (locationLower.includes('off-site') || 
+        locationLower.includes('storage') || 
+        locationLower.includes('external')) {
+      return {
+        bgColor: 'bg-yellow-100',
+        textColor: 'text-yellow-800',
+        borderColor: 'border-yellow-200'
+      };
+    }
+    
+    // Default to GREEN (On-site)
+    return {
+      bgColor: 'bg-green-100',
+      textColor: 'text-green-800',
+      borderColor: 'border-green-200'
+    };
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/20 flex items-center justify-center">
@@ -265,6 +343,7 @@ const VehicleDetail: React.FC = () => {
 
   const summaryNotes = getSummaryNotes();
   const isReadyForSale = Object.values(vehicle.status).every(status => status === 'completed');
+  const locationStyle = getLocationStyle(vehicle.location);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/20">
@@ -288,12 +367,61 @@ const VehicleDetail: React.FC = () => {
               </div>
             </div>
             
-            {isReadyForSale && (
-              <div className="flex items-center gap-2 px-4 py-2 bg-emerald-100 text-emerald-700 rounded-full text-sm font-semibold border border-emerald-200">
-                <CheckCircle2 className="w-4 h-4" />
-                Ready for Sale
+            <div className="flex items-center gap-4">
+              {/* NEW: Editable Location Status */}
+              <div className="flex items-center gap-2">
+                {isEditingLocation ? (
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={editedLocation}
+                      onChange={(e) => setEditedLocation(e.target.value)}
+                      className="px-3 py-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm min-w-[120px]"
+                      placeholder="Enter location"
+                      autoFocus
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter') {
+                          handleSaveLocation();
+                        } else if (e.key === 'Escape') {
+                          handleCancelEditLocation();
+                        }
+                      }}
+                    />
+                    <button
+                      onClick={handleSaveLocation}
+                      className="p-1 text-green-600 hover:bg-green-50 rounded transition-colors"
+                      title="Save location"
+                    >
+                      <Save className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={handleCancelEditLocation}
+                      className="p-1 text-gray-600 hover:bg-gray-50 rounded transition-colors"
+                      title="Cancel"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setIsEditingLocation(true)}
+                    className={`inline-flex items-center gap-2 px-3 py-1 rounded-lg text-sm font-medium border transition-all duration-200 hover:shadow-md ${locationStyle.bgColor} ${locationStyle.textColor} ${locationStyle.borderColor}`}
+                    title="Click to edit location"
+                  >
+                    <MapPin className="w-4 h-4" />
+                    <span>{vehicle.location}</span>
+                    <Edit3 className="w-3 h-3 opacity-60" />
+                  </button>
+                )}
               </div>
-            )}
+
+              {isReadyForSale && (
+                <div className="flex items-center gap-2 px-4 py-2 bg-emerald-100 text-emerald-700 rounded-full text-sm font-semibold border border-emerald-200">
+                  <CheckCircle2 className="w-4 h-4" />
+                  Ready for Sale
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -827,6 +955,11 @@ const VehicleDetail: React.FC = () => {
                   <div className="flex items-center gap-2">
                     <MapPin className="w-4 h-4 text-gray-500" />
                     <p className="text-sm text-gray-900">{vehicle.location}</p>
+                    {vehicle.locationChangedBy && (
+                      <span className="text-xs text-gray-500">
+                        (Updated by {vehicle.locationChangedBy})
+                      </span>
+                    )}
                   </div>
                 </div>
                 
