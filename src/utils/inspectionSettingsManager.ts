@@ -21,7 +21,36 @@ export class InspectionSettingsManager {
   static getSettings(dealershipId: string): InspectionSettings | null {
     const key = `${this.STORAGE_KEY}_${dealershipId}`;
     const data = localStorage.getItem(key);
-    return data ? JSON.parse(data) : null;
+    
+    if (!data) return null;
+    
+    try {
+      const storedSettings = JSON.parse(data);
+      
+      // Deep merge with default settings to ensure all properties exist
+      const mergedSettings: InspectionSettings = {
+        ...DEFAULT_INSPECTION_SETTINGS,
+        ...storedSettings,
+        // Ensure nested objects are properly merged
+        customerPdfSettings: {
+          ...DEFAULT_INSPECTION_SETTINGS.customerPdfSettings,
+          ...(storedSettings.customerPdfSettings || {})
+        },
+        globalSettings: {
+          ...DEFAULT_INSPECTION_SETTINGS.globalSettings,
+          ...(storedSettings.globalSettings || {})
+        },
+        ratingLabels: storedSettings.ratingLabels && storedSettings.ratingLabels.length > 0 
+          ? storedSettings.ratingLabels 
+          : DEFAULT_INSPECTION_SETTINGS.ratingLabels,
+        sections: storedSettings.sections || DEFAULT_INSPECTION_SETTINGS.sections
+      };
+      
+      return mergedSettings;
+    } catch (error) {
+      console.error('Error parsing inspection settings:', error);
+      return null;
+    }
   }
 
   static saveSettings(dealershipId: string, settings: InspectionSettings): void {
