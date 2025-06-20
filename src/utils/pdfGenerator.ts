@@ -450,13 +450,13 @@ export class PDFGenerator {
   }
 
   // Helper methods for PDF generation
-  private static getOverallProgress(vehicle: Vehicle): number {
+  static getOverallProgress(vehicle: Vehicle): number {
     const statuses = Object.values(vehicle.status);
     const completed = statuses.filter(status => status === 'completed').length;
     return (completed / statuses.length) * 100;
   }
 
-  private static getRatingColorLight(rating: string): string {
+  static getRatingColorLight(rating: string): string {
     switch (rating) {
       case 'great':
         return '#d1fae5'; // emerald-100
@@ -469,7 +469,7 @@ export class PDFGenerator {
     }
   }
 
-  private static getRatingColorDark(rating: string): string {
+  static getRatingColorDark(rating: string): string {
     switch (rating) {
       case 'great':
         return '#065f46'; // emerald-800

@@ -27,9 +27,7 @@ import {
   Circle,
   Copy,
   Move,
-  FileText,
-  Image,
-  MessageSquare
+  FileText
 } from 'lucide-react';
 
 interface SectionModalProps {
@@ -298,15 +296,10 @@ const SectionModal: React.FC<SectionModalProps> = ({ section, isOpen, onClose, o
               <span>{formData.icon}</span>
               <span>{formData.label || 'Section Name'}</span>
             </div>
-            {formData.isCustomerVisible ? (
-              <div className="mt-2 inline-flex items-center gap-1 px-2 py-0.5 bg-green-100 text-green-700 rounded-full text-xs font-medium border border-green-200">
+            {formData.isCustomerVisible && (
+              <div className="mt-2 inline-flex items-center gap-1 px-2 py-0.5 bg-green-100 text-green-800 rounded-full text-xs font-medium border border-green-200">
                 <Eye className="w-3 h-3" />
                 <span>Customer Visible</span>
-              </div>
-            ) : (
-              <div className="mt-2 inline-flex items-center gap-1 px-2 py-0.5 bg-gray-100 text-gray-700 rounded-full text-xs font-medium border border-gray-200">
-                <EyeOff className="w-3 h-3" />
-                <span>Hidden from Customer</span>
               </div>
             )}
           </div>
@@ -631,8 +624,8 @@ const InspectionSettings: React.FC = () => {
     loadSettings();
   };
 
-  const handleUpdatePdfSettings = (updates: Partial<InspectionSettingsType['customerPdfSettings']>) => {
-    if (!dealership || !settings) return;
+  const handleUpdateCustomerPdfSettings = (updates: Partial<InspectionSettingsType['customerPdfSettings']>) => {
+    if (!dealership) return;
     
     InspectionSettingsManager.updateCustomerPdfSettings(dealership.id, updates);
     loadSettings();
@@ -881,15 +874,10 @@ const InspectionSettings: React.FC = () => {
                             Inactive
                           </span>
                         )}
-                        {section.isCustomerVisible ? (
+                        {section.isCustomerVisible && (
                           <span className="inline-flex items-center gap-1 px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
                             <Eye className="w-3 h-3" />
                             Customer Visible
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 px-2 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-medium">
-                            <EyeOff className="w-3 h-3" />
-                            Hidden from Customer
                           </span>
                         )}
                       </div>
@@ -914,11 +902,7 @@ const InspectionSettings: React.FC = () => {
                           }`}
                           title={section.isCustomerVisible ? 'Hide from customer PDF' : 'Show in customer PDF'}
                         >
-                          {section.isCustomerVisible ? (
-                            <FileText className="w-4 h-4" />
-                          ) : (
-                            <EyeOff className="w-4 h-4" />
-                          )}
+                          <FileText className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => setEditingSection(section)}
@@ -1086,10 +1070,7 @@ const InspectionSettings: React.FC = () => {
 
       {activeTab === 'pdf' && (
         <div className="bg-white/70 backdrop-blur-sm rounded-xl shadow-lg border border-white/20 p-6">
-          <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
-            <FileText className="w-5 h-5" />
-            Customer PDF Settings
-          </h3>
+          <h3 className="text-lg font-bold text-gray-900 mb-6">Customer PDF Settings</h3>
           <p className="text-gray-600 mb-6">Configure how inspection reports appear to customers.</p>
           
           <div className="space-y-6">
@@ -1099,13 +1080,17 @@ const InspectionSettings: React.FC = () => {
                 
                 <label className="flex items-center justify-between p-4 bg-gray-50/80 rounded-lg border border-gray-200/60">
                   <div>
-                    <span className="font-medium text-gray-900">Include Vehicle Photos</span>
-                    <p className="text-sm text-gray-600">Show vehicle photos in the PDF report</p>
+                    <span className="font-medium text-gray-900">Show Detailed Ratings</span>
+                    <p className="text-sm text-gray-600">Display detailed rating information for each item</p>
                   </div>
                   <input
                     type="checkbox"
-                    checked={settings.customerPdfSettings.includeVehiclePhotos}
-                    onChange={(e) => handleUpdatePdfSettings({ includeVehiclePhotos: e.target.checked })}
+                    checked={settings.customerPdfSettings.showDetailedRatings}
+                    onChange={(e) => {
+                      handleUpdateCustomerPdfSettings({
+                        showDetailedRatings: e.target.checked
+                      });
+                    }}
                     className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                   />
                 </label>
@@ -1118,21 +1103,30 @@ const InspectionSettings: React.FC = () => {
                   <input
                     type="checkbox"
                     checked={settings.customerPdfSettings.includeCustomerComments}
-                    onChange={(e) => handleUpdatePdfSettings({ includeCustomerComments: e.target.checked })}
+                    onChange={(e) => {
+                      handleUpdateCustomerPdfSettings({
+                        includeCustomerComments: e.target.checked
+                      });
+                    }}
                     className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                   />
                 </label>
 
                 <label className="flex items-center justify-between p-4 bg-gray-50/80 rounded-lg border border-gray-200/60">
                   <div>
-                    <span className="font-medium text-gray-900">Show Detailed Ratings</span>
-                    <p className="text-sm text-gray-600">Display detailed rating information for each item</p>
+                    <span className="font-medium text-gray-900">Include Vehicle Photos</span>
+                    <p className="text-sm text-gray-600">Include vehicle photos in the PDF (coming soon)</p>
                   </div>
                   <input
                     type="checkbox"
-                    checked={settings.customerPdfSettings.showDetailedRatings}
-                    onChange={(e) => handleUpdatePdfSettings({ showDetailedRatings: e.target.checked })}
+                    checked={settings.customerPdfSettings.includeVehiclePhotos}
+                    onChange={(e) => {
+                      handleUpdateCustomerPdfSettings({
+                        includeVehiclePhotos: e.target.checked
+                      });
+                    }}
                     className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    disabled={true}
                   />
                 </label>
               </div>
@@ -1146,78 +1140,74 @@ const InspectionSettings: React.FC = () => {
                   </label>
                   <textarea
                     value={settings.customerPdfSettings.footerText || ''}
-                    onChange={(e) => handleUpdatePdfSettings({ footerText: e.target.value })}
-                    placeholder="Custom footer text for PDF reports..."
+                    onChange={(e) => {
+                      handleUpdateCustomerPdfSettings({
+                        footerText: e.target.value
+                      });
+                    }}
+                    placeholder="Enter footer text for the PDF report..."
                     rows={3}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                   />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Company Logo URL (Coming Soon)
+                  </label>
+                  <input
+                    type="text"
+                    value={settings.customerPdfSettings.companyLogo || ''}
+                    onChange={(e) => {
+                      handleUpdateCustomerPdfSettings({
+                        companyLogo: e.target.value
+                      });
+                    }}
+                    placeholder="https://example.com/logo.png"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    disabled={true}
+                  />
                   <p className="text-xs text-gray-500 mt-1">
-                    This text will appear at the bottom of each PDF report
+                    Enter a URL to your company logo (coming soon)
                   </p>
                 </div>
               </div>
             </div>
 
-            <div className="border-t border-gray-200 pt-6">
-              <h4 className="font-medium text-gray-900 mb-4">Section Visibility</h4>
-              <p className="text-sm text-gray-600 mb-4">
-                Control which inspection sections are visible to customers in the PDF report.
-                You can also toggle visibility for each section from the Sections tab.
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <h4 className="font-semibold text-blue-900 mb-2">Section Visibility</h4>
+              <p className="text-sm text-blue-800 mb-4">
+                Control which inspection sections are visible in the customer PDF report.
+                Toggle visibility using the document icon <FileText className="w-3 h-3 inline" /> in the sections tab.
               </p>
               
-              <div className="space-y-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {settings.sections
+                  .filter(section => section.isActive)
                   .sort((a, b) => a.order - b.order)
-                  .map((section) => (
-                    <div key={section.id} className="flex items-center justify-between p-3 bg-gray-50/80 rounded-lg border border-gray-200/60">
-                      <div className="flex items-center gap-3">
-                        <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-medium border ${section.color}`}>
-                          <span>{section.icon}</span>
-                          <span>{section.label}</span>
+                  .map(section => (
+                    <div key={section.id} className="flex items-center justify-between p-3 bg-white rounded-lg border border-blue-100">
+                      <div className="flex items-center gap-2">
+                        <div className={`inline-flex items-center justify-center w-6 h-6 rounded-full ${section.color.split(' ')[0]}`}>
+                          <span className="text-xs">{section.icon}</span>
                         </div>
-                        {!section.isActive && (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-red-100 text-red-700 rounded-full text-xs font-medium">
-                            <EyeOff className="w-3 h-3" />
-                            Inactive
-                          </span>
-                        )}
+                        <span className="text-sm font-medium">{section.label}</span>
                       </div>
-                      <div className="flex items-center gap-3">
-                        <span className="text-sm text-gray-600">
-                          {section.isCustomerVisible ? 'Visible to customer' : 'Hidden from customer'}
-                        </span>
+                      <div className="flex items-center">
                         <button
                           onClick={() => handleToggleSectionCustomerVisible(section.id)}
-                          className={`p-2 rounded-lg transition-colors ${
+                          className={`p-1.5 rounded-lg transition-colors ${
                             section.isCustomerVisible
                               ? 'text-green-600 hover:bg-green-50'
                               : 'text-gray-400 hover:bg-gray-50'
                           }`}
-                          title={section.isCustomerVisible ? 'Hide from customer' : 'Show to customer'}
+                          title={section.isCustomerVisible ? 'Visible to customers' : 'Hidden from customers'}
                         >
                           {section.isCustomerVisible ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
                         </button>
                       </div>
                     </div>
                   ))}
-              </div>
-            </div>
-
-            <div className="border-t border-gray-200 pt-6">
-              <h4 className="font-medium text-gray-900 mb-4">PDF Preview</h4>
-              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-center">
-                <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-600 mb-4">Preview how your inspection report will look to customers.</p>
-                <p className="text-sm text-gray-500 mb-4">
-                  The PDF will include all sections marked as "Customer Visible" with their inspection items and ratings.
-                </p>
-                <button
-                  onClick={() => {/* PDF preview functionality would go here */}}
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-                >
-                  <Eye className="w-4 h-4" />
-                  Preview Sample PDF
-                </button>
               </div>
             </div>
           </div>

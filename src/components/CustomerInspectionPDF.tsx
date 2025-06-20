@@ -44,11 +44,15 @@ const CustomerInspectionPDF: React.FC<CustomerInspectionPDFProps> = ({
       
       // Load customer comments
       loadCustomerComments();
-      
-      // Generate PDF preview
-      generatePdfPreview();
     }
   }, [dealership, vehicle, isOpen]);
+
+  // Separate useEffect for generating PDF to ensure settings are loaded
+  useEffect(() => {
+    if (isOpen && inspectionSettings) {
+      generatePdfPreview();
+    }
+  }, [inspectionSettings, customerComments, isOpen]);
 
   const loadCustomerComments = () => {
     // Load from localStorage
@@ -79,46 +83,48 @@ const CustomerInspectionPDF: React.FC<CustomerInspectionPDFProps> = ({
     const updatedComments = [newComment, ...customerComments];
     setCustomerComments(updatedComments);
     saveCustomerComments(updatedComments);
-    
-    // Regenerate PDF preview
-    generatePdfPreview();
   };
 
   const handleDeleteComment = (commentId: string) => {
     const updatedComments = customerComments.filter(comment => comment.id !== commentId);
     setCustomerComments(updatedComments);
     saveCustomerComments(updatedComments);
-    
-    // Regenerate PDF preview
-    generatePdfPreview();
   };
 
   const generatePdfPreview = () => {
-    if (!dealership || !inspectionSettings) return;
+    if (!dealership || !inspectionSettings) {
+      console.error('Cannot generate PDF: Missing dealership or inspection settings');
+      return;
+    }
     
     setIsGenerating(true);
     
-    // Get dealership info
-    const dealershipInfo = {
-      name: dealership.name,
-      address: `${dealership.address}, ${dealership.city}, ${dealership.state} ${dealership.zipCode}`,
-      phone: dealership.phone,
-      email: dealership.email,
-      website: dealership.website
-    };
-    
-    // Generate PDF HTML
-    const html = PDFGenerator.generateCustomerInspectionPDF({
-      vehicle,
-      inspectionSettings,
-      customerComments,
-      dealershipInfo,
-      inspectionDate: new Date().toISOString(),
-      inspectorName: user ? `${user.firstName} ${user.lastName}` : undefined
-    });
-    
-    setPdfHtml(html);
-    setIsGenerating(false);
+    try {
+      // Get dealership info
+      const dealershipInfo = {
+        name: dealership.name,
+        address: `${dealership.address}, ${dealership.city}, ${dealership.state} ${dealership.zipCode}`,
+        phone: dealership.phone,
+        email: dealership.email,
+        website: dealership.website
+      };
+      
+      // Generate PDF HTML
+      const html = PDFGenerator.generateCustomerInspectionPDF({
+        vehicle,
+        inspectionSettings,
+        customerComments,
+        dealershipInfo,
+        inspectionDate: new Date().toISOString(),
+        inspectorName: user ? `${user.firstName} ${user.lastName}` : undefined
+      });
+      
+      setPdfHtml(html);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   const handleDownloadPDF = () => {
@@ -190,6 +196,7 @@ const CustomerInspectionPDF: React.FC<CustomerInspectionPDFProps> = ({
                 <button
                   onClick={handlePreviewPDF}
                   className="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+                  disabled={!pdfHtml || isGenerating}
                 >
                   <Eye className="w-4 h-4" />
                   <span>Preview</span>
@@ -197,6 +204,7 @@ const CustomerInspectionPDF: React.FC<CustomerInspectionPDFProps> = ({
                 <button
                   onClick={handleDownloadPDF}
                   className="inline-flex items-center gap-1 px-3 py-1.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm"
+                  disabled={!pdfHtml || isGenerating}
                 >
                   <Download className="w-4 h-4" />
                   <span>Download</span>
@@ -226,6 +234,12 @@ const CustomerInspectionPDF: React.FC<CustomerInspectionPDFProps> = ({
                   <div className="text-center">
                     <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
                     <p className="text-gray-600">PDF preview not available</p>
+                    <button 
+                      onClick={generatePdfPreview}
+                      className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    >
+                      Generate Preview
+                    </button>
                   </div>
                 </div>
               )}
@@ -300,6 +314,7 @@ const CustomerInspectionPDF: React.FC<CustomerInspectionPDFProps> = ({
                 <button
                   onClick={handleDownloadPDF}
                   className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                  disabled={!pdfHtml || isGenerating}
                 >
                   <Download className="w-4 h-4" />
                   Download PDF

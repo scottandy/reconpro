@@ -218,20 +218,6 @@ export class InspectionSettingsManager {
     return settings.ratingLabels[labelIndex];
   }
 
-  // Global Settings Management
-  static updateGlobalSettings(dealershipId: string, updates: Partial<InspectionSettings['globalSettings']>): boolean {
-    const settings = this.getSettings(dealershipId);
-    if (!settings) return false;
-
-    settings.globalSettings = {
-      ...settings.globalSettings,
-      ...updates
-    };
-
-    this.saveSettings(dealershipId, settings);
-    return true;
-  }
-
   // Customer PDF Settings Management
   static updateCustomerPdfSettings(dealershipId: string, updates: Partial<InspectionSettings['customerPdfSettings']>): boolean {
     const settings = this.getSettings(dealershipId);
@@ -239,6 +225,20 @@ export class InspectionSettingsManager {
 
     settings.customerPdfSettings = {
       ...settings.customerPdfSettings,
+      ...updates
+    };
+
+    this.saveSettings(dealershipId, settings);
+    return true;
+  }
+
+  // Global Settings Management
+  static updateGlobalSettings(dealershipId: string, updates: Partial<InspectionSettings['globalSettings']>): boolean {
+    const settings = this.getSettings(dealershipId);
+    if (!settings) return false;
+
+    settings.globalSettings = {
+      ...settings.globalSettings,
       ...updates
     };
 
