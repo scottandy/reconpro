@@ -1,5 +1,6 @@
 import { Vehicle } from '../types/vehicle';
 import { InspectionSettings } from '../types/inspectionSettings';
+import { ProgressCalculator } from '../utils/progressCalculator';
 
 export interface CustomerComment {
   id: string;
@@ -365,9 +366,9 @@ export class PDFGenerator {
             </div>
             
             <div class="progress-container">
-              <div class="progress-bar" style="width: ${this.getOverallProgress(vehicle)}%"></div>
+              <div class="progress-bar" style="width: ${ProgressCalculator.calculateDetailedProgress(vehicle.id, vehicle)}%"></div>
             </div>
-            <div class="progress-text">${Math.round(this.getOverallProgress(vehicle))}% Complete</div>
+            <div class="progress-text">${Math.round(ProgressCalculator.calculateDetailedProgress(vehicle.id, vehicle))}% Complete</div>
           </div>
           
           ${vehicle.notes ? `
@@ -438,7 +439,7 @@ export class PDFGenerator {
           </div>
           
           <div class="footer">
-            <p>${inspectionSettings.customerPdfSettings.footerText || ''}</p>
+            <p>${inspectionSettings.customerPdfSettings?.footerText || ''}</p>
             <p>Report generated on ${new Date().toLocaleDateString()} by ${dealershipInfo.name}</p>
           </div>
         </div>
@@ -451,9 +452,8 @@ export class PDFGenerator {
 
   // Helper methods for PDF generation
   static getOverallProgress(vehicle: Vehicle): number {
-    const statuses = Object.values(vehicle.status);
-    const completed = statuses.filter(status => status === 'completed').length;
-    return (completed / statuses.length) * 100;
+    // Use the new detailed progress calculator
+    return ProgressCalculator.calculateDetailedProgress(vehicle.id, vehicle);
   }
 
   static getRatingColorLight(rating: string): string {

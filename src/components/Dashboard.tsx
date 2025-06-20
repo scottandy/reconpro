@@ -13,6 +13,7 @@ import ThemeSettings from './ThemeSettings';
 import ContactManagement from './ContactManagement';
 import TodoCalendar from './TodoCalendar';
 import InspectionSettings from './InspectionSettings';
+import { ProgressCalculator } from '../utils/progressCalculator';
 import { 
   Car, 
   Plus, 
@@ -555,6 +556,7 @@ const Dashboard: React.FC = () => {
                           <p className="text-xs sm:text-sm font-semibold text-amber-600 dark:text-amber-400 uppercase tracking-wide mb-1">Working</p>
                           <p className="text-xl sm:text-3xl font-bold text-amber-900 dark:text-amber-100 group-hover:text-amber-700 dark:group-hover:text-amber-200 transition-colors">{inventorySummary.inProgress}</p>
                           <p className="text-xs text-amber-600 dark:text-amber-400 hidden sm:block">
+                
                             {inventorySummary.totalInventory > 0 ? Math.round((inventorySummary.inProgress / inventorySummary.totalInventory) * 100) : 0}% of total
                           </p>
                         </div>
