@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { TeamNote } from '../types/vehicle';
+import { useAuth } from '../contexts/AuthContext';
 import { MessageSquare, Plus, Clock, User, Tag, CheckCircle2, Shield, FileText } from 'lucide-react';
 
 interface TeamNotesProps {
@@ -8,17 +9,17 @@ interface TeamNotesProps {
 }
 
 const TeamNotes: React.FC<TeamNotesProps> = ({ notes, onAddNote }) => {
+  const { user } = useAuth();
   const [isAddingNote, setIsAddingNote] = useState(false);
   const [newNote, setNewNote] = useState('');
-  const [userInitials, setUserInitials] = useState('');
   const [category, setCategory] = useState<TeamNote['category']>('general');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (newNote.trim() && userInitials.trim()) {
+    if (newNote.trim() && user?.initials) {
       onAddNote({
         text: newNote.trim(),
-        userInitials: userInitials.trim().toUpperCase(),
+        userInitials: user.initials,
         category
       });
       setNewNote('');
@@ -103,40 +104,39 @@ const TeamNotes: React.FC<TeamNotesProps> = ({ notes, onAddNote }) => {
 
       {isAddingNote && (
         <form onSubmit={handleSubmit} className="mb-4 sm:mb-6 p-3 sm:p-4 bg-gray-50/80 backdrop-blur-sm rounded-lg border border-gray-200/60">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mb-3 sm:mb-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Your Initials
-              </label>
-              <input
-                type="text"
-                value={userInitials}
-                onChange={(e) => setUserInitials(e.target.value)}
-                placeholder="e.g., JD"
-                maxLength={4}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
-                required
-              />
+          {/* User Info Display */}
+          {user && (
+            <div className="mb-3 sm:mb-4 p-3 bg-blue-50/80 rounded-lg border border-blue-200/60">
+              <div className="flex items-center gap-2">
+                <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center">
+                  <span className="text-blue-700 font-bold text-xs">{user.initials}</span>
+                </div>
+                <span className="text-sm font-medium text-blue-800">
+                  Adding note as: {user.firstName} {user.lastName}
+                </span>
+              </div>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Category
-              </label>
-              <select
-                value={category}
-                onChange={(e) => setCategory(e.target.value as TeamNote['category'])}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
-              >
-                <option value="general">General</option>
-                <option value="summary">Summary</option>
-                <option value="emissions">Emissions</option>
-                <option value="cosmetic">Cosmetic</option>
-                <option value="mechanical">Mechanical</option>
-                <option value="cleaning">Cleaning</option>
-                <option value="photos">Photos</option>
-              </select>
-            </div>
+          )}
+
+          <div className="mb-3 sm:mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Category
+            </label>
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value as TeamNote['category'])}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+            >
+              <option value="general">General</option>
+              <option value="summary">Summary</option>
+              <option value="emissions">Emissions</option>
+              <option value="cosmetic">Cosmetic</option>
+              <option value="mechanical">Mechanical</option>
+              <option value="cleaning">Cleaning</option>
+              <option value="photos">Photos</option>
+            </select>
           </div>
+          
           <div className="mb-3 sm:mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Note
@@ -164,7 +164,8 @@ const TeamNotes: React.FC<TeamNotesProps> = ({ notes, onAddNote }) => {
           <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
             <button
               type="submit"
-              className="px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm"
+              disabled={!user?.initials || !newNote.trim()}
+              className="px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm disabled:bg-gray-300 disabled:cursor-not-allowed"
             >
               Add Note
             </button>
@@ -173,7 +174,6 @@ const TeamNotes: React.FC<TeamNotesProps> = ({ notes, onAddNote }) => {
               onClick={() => {
                 setIsAddingNote(false);
                 setNewNote('');
-                setUserInitials('');
                 setCategory('general');
               }}
               className="px-3 sm:px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition-colors font-medium text-sm"

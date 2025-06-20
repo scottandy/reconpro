@@ -558,7 +558,7 @@ const InspectionChecklist: React.FC<InspectionChecklistProps> = ({ vehicle, onSt
     }
   }, [inspectionData, vehicle.id, isLoaded]);
 
-  // 🎯 NEW: Enhanced item update with team notes and analytics tracking
+  // 🎯 ENHANCED: Auto-use logged-in user's initials
   const updateInspectionItem = (section: keyof InspectionData, key: string, rating: ItemRating) => {
     // Get custom rating labels if available
     const ratingLabels = inspectionSettings?.ratingLabels || [];
@@ -572,11 +572,8 @@ const InspectionChecklist: React.FC<InspectionChecklistProps> = ({ vehicle, onSt
              rating === 'needs-attention' ? 'Needs Attention' : 'Not Checked';
     };
     
-    // Prompt for user initials when making any rating change
-    const userInitials = prompt('Enter your initials to record this task update:');
-    if (!userInitials?.trim()) {
-      return; // Don't update if no initials provided
-    }
+    // 🎯 SIMPLIFIED: Use logged-in user's initials automatically
+    const userInitials = user?.initials || 'Unknown';
 
     const oldItem = inspectionData[section].find(item => item.key === key);
     const oldRating = oldItem?.rating || 'not-checked';
@@ -618,7 +615,7 @@ const InspectionChecklist: React.FC<InspectionChecklistProps> = ({ vehicle, onSt
       // Add team note
       onAddTeamNote({
         text: noteText,
-        userInitials: userInitials.trim().toUpperCase(),
+        userInitials: userInitials,
         category: sectionName as any
       });
 
@@ -628,7 +625,7 @@ const InspectionChecklist: React.FC<InspectionChecklistProps> = ({ vehicle, onSt
         vehicle.id, 
         vehicleName, 
         sectionName as any, 
-        userInitials.trim().toUpperCase(),
+        userInitials,
         itemLabel,
         oldRating,
         rating
@@ -820,6 +817,23 @@ const InspectionChecklist: React.FC<InspectionChecklistProps> = ({ vehicle, onSt
                   Showing only {activeFilter === 'cleaned' ? 'cleaning' : activeFilter} section for faster completion
                 </p>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* User Info Display */}
+      {user && (
+        <div className="bg-green-50/80 backdrop-blur-sm border border-green-200 rounded-xl p-3">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+              <span className="text-green-700 font-bold text-sm">{user.initials}</span>
+            </div>
+            <div>
+              <h4 className="text-sm font-semibold text-green-800">Working as: {user.firstName} {user.lastName}</h4>
+              <p className="text-xs text-green-700">
+                All task updates will be automatically recorded with your initials
+              </p>
             </div>
           </div>
         </div>
