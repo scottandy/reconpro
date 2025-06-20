@@ -73,8 +73,8 @@ const CustomerCommentModal: React.FC<CustomerCommentModalProps> = ({
                 <MessageSquare className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-gray-900">Add Customer Comment</h3>
-                <p className="text-sm text-gray-600">Add a customer comment to the inspection report</p>
+                <h3 className="text-lg font-bold text-gray-900">Add Inspection Note</h3>
+                <p className="text-sm text-gray-600">Add a note to the inspection report</p>
               </div>
             </div>
             <button
@@ -110,12 +110,12 @@ const CustomerCommentModal: React.FC<CustomerCommentModalProps> = ({
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Comment *
+                Note *
               </label>
               <textarea
                 value={formData.comment}
                 onChange={(e) => setFormData(prev => ({ ...prev, comment: e.target.value }))}
-                placeholder="Enter customer comment or feedback..."
+                placeholder="Enter inspection note or feedback..."
                 rows={4}
                 className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none ${
                   errors.comment ? 'border-red-300' : 'border-gray-300'
@@ -161,7 +161,7 @@ const CustomerCommentModal: React.FC<CustomerCommentModalProps> = ({
                 className="flex-1 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center justify-center gap-2"
               >
                 <Send className="w-4 h-4" />
-                Add Comment
+                Add Note
               </button>
               <button
                 type="button"

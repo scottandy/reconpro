@@ -15,7 +15,8 @@ import {
   Mail, 
   Share2,
   Printer,
-  RefreshCw
+  RefreshCw,
+  AlertTriangle
 } from 'lucide-react';
 import CustomerCommentModal from './CustomerCommentModal';
 
@@ -298,7 +299,7 @@ const CustomerInspectionPDF: React.FC<CustomerInspectionPDFProps> = ({
           {/* Right Panel - Customer Comments */}
           <div className="w-full md:w-80 border-t md:border-t-0 md:border-l border-gray-200 flex flex-col">
             <div className="p-4 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
-              <h3 className="font-medium text-gray-900">Customer Comments</h3>
+              <h3 className="font-medium text-gray-900">Inspection Notes</h3>
               <button
                 onClick={() => setShowCommentModal(true)}
                 className="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
@@ -345,13 +346,13 @@ const CustomerInspectionPDF: React.FC<CustomerInspectionPDFProps> = ({
               ) : (
                 <div className="text-center py-8">
                   <MessageSquare className="w-10 h-10 text-gray-400 mx-auto mb-2" />
-                  <p className="text-sm text-gray-600 mb-4">No customer comments yet</p>
+                  <p className="text-sm text-gray-600 mb-4">No inspection notes yet</p>
                   <button
                     onClick={() => setShowCommentModal(true)}
                     className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
                   >
                     <Plus className="w-4 h-4" />
-                    Add First Comment
+                    Add First Note
                   </button>
                 </div>
               )}

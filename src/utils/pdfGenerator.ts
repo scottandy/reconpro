@@ -55,14 +55,6 @@ export class PDFGenerator {
       });
     };
 
-    const formatPrice = (price: number) => {
-      return new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'USD',
-        minimumFractionDigits: 0
-      }).format(price);
-    };
-
     const getStockNumber = (vin: string): string => {
       return vin.slice(-6);
     };
@@ -352,10 +344,6 @@ export class PDFGenerator {
                 <label>Mileage</label>
                 <p>${vehicle.mileage.toLocaleString()} miles</p>
               </div>
-              <div class="info-item">
-                <label>Price</label>
-                <p>${formatPrice(vehicle.price)}</p>
-              </div>
             </div>
             
             <div class="info-item">
@@ -416,7 +404,7 @@ export class PDFGenerator {
           
           ${customerComments.length > 0 ? `
             <div class="customer-comments">
-              <h3>Customer Comments</h3>
+              <h3>Inspection Notes</h3>
               ${customerComments.map(comment => `
                 <div class="comment">
                   <div class="comment-section">${comment.section}</div>
