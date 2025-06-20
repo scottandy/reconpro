@@ -14,7 +14,8 @@ import {
   Check, 
   Mail, 
   Share2,
-  Printer
+  Printer,
+  RefreshCw
 } from 'lucide-react';
 import CustomerCommentModal from './CustomerCommentModal';
 
@@ -35,6 +36,7 @@ const CustomerInspectionPDF: React.FC<CustomerInspectionPDFProps> = ({
   const [showCommentModal, setShowCommentModal] = useState(false);
   const [pdfHtml, setPdfHtml] = useState<string>('');
   const [isGenerating, setIsGenerating] = useState(false);
+  const [lastRefreshed, setLastRefreshed] = useState<Date>(new Date());
 
   useEffect(() => {
     if (dealership && isOpen) {
@@ -50,12 +52,25 @@ const CustomerInspectionPDF: React.FC<CustomerInspectionPDFProps> = ({
     }
   }, [dealership, vehicle, isOpen]);
 
+  // Listen for inspection data changes
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'vehicleInspections') {
+        console.log('🔄 Inspection data changed, refreshing PDF...');
+        setLastRefreshed(new Date());
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
+
   // Separate useEffect for generating PDF to ensure settings are loaded
   useEffect(() => {
     if (isOpen && inspectionSettings) {
       generatePdfPreview();
     }
-  }, [inspectionSettings, customerComments, isOpen]);
+  }, [inspectionSettings, customerComments, isOpen, lastRefreshed]);
 
   const loadCustomerComments = () => {
     // Load from localStorage
@@ -125,6 +140,7 @@ const CustomerInspectionPDF: React.FC<CustomerInspectionPDFProps> = ({
       setPdfHtml(html);
     } catch (error) {
       console.error('Error generating PDF:', error);
+      alert(`Error generating PDF: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setIsGenerating(false);
     }
@@ -163,6 +179,12 @@ const CustomerInspectionPDF: React.FC<CustomerInspectionPDFProps> = ({
       }));
   };
 
+  // Manual refresh handler
+  const handleManualRefresh = () => {
+    setLastRefreshed(new Date());
+    generatePdfPreview();
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -196,6 +218,14 @@ const CustomerInspectionPDF: React.FC<CustomerInspectionPDFProps> = ({
             <div className="p-4 bg-gray-50 border-b border-gray-200 flex items-center justify-between">
               <h3 className="font-medium text-gray-900">PDF Preview</h3>
               <div className="flex items-center gap-2">
+                <button
+                  onClick={handleManualRefresh}
+                  className="inline-flex items-center gap-1 px-3 py-1.5 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors text-sm"
+                  disabled={isGenerating}
+                >
+                  <RefreshCw className={`w-4 h-4 ${isGenerating ? 'animate-spin' : ''}`} />
+                  <span>Refresh</span>
+                </button>
                 <button
                   onClick={handlePreviewPDF}
                   className="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"

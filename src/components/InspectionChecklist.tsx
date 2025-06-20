@@ -346,10 +346,10 @@ const ChecklistSection: React.FC<{
             <div className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm flex-shrink-0">
               <span className="text-gray-600 hidden sm:inline">{checkedItems}/{totalItems}</span>
               <div className={`inline-flex items-center gap-0.5 sm:gap-1 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-xs font-medium ${
-                currentStatus === 'completed' ? 'bg-emerald-100 text-emerald-700 border border-emerald-200' :
-                currentStatus === 'needs-attention' ? 'bg-red-100 text-red-700 border border-red-200' :
-                currentStatus === 'pending' ? 'bg-yellow-100 text-yellow-700 border border-yellow-200' :
-                'bg-gray-100 text-gray-700 border border-gray-200'
+                currentStatus === 'completed' ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' :
+                currentStatus === 'needs-attention' ? 'bg-red-100 text-red-800 border border-red-200' :
+                currentStatus === 'pending' ? 'bg-yellow-100 text-yellow-800 border border-yellow-200' :
+                'bg-gray-100 text-gray-600 border border-gray-200'
               }`}>
                 {currentStatus === 'completed' && <CheckCircle2 className="w-2.5 h-2.5 sm:w-3 sm:h-3" />}
                 {currentStatus === 'needs-attention' && <AlertTriangle className="w-2.5 h-2.5 sm:w-3 sm:h-3" />}
@@ -483,6 +483,7 @@ const InspectionChecklist: React.FC<InspectionChecklistProps> = ({ vehicle, onSt
   const [inspectionData, setInspectionData] = useState<InspectionData>(DEFAULT_INSPECTION_DATA);
   const [isLoaded, setIsLoaded] = useState(false);
   const [inspectionSettings, setInspectionSettings] = useState<InspectionSettings | null>(null);
+  const [autoSaveTimer, setAutoSaveTimer] = useState<NodeJS.Timeout | null>(null);
 
   // Load inspection settings when component mounts
   useEffect(() => {
@@ -536,12 +537,34 @@ const InspectionChecklist: React.FC<InspectionChecklistProps> = ({ vehicle, onSt
     loadInspectionData();
   }, [vehicle.id]);
 
-  // 🎯 BULLETPROOF AUTO-SAVE - ONLY AFTER DATA IS LOADED
+  // 🎯 ENHANCED AUTO-SAVE - Debounced to prevent excessive saves
   useEffect(() => {
     if (!isLoaded) {
       return;
     }
 
+    // Clear any existing timer
+    if (autoSaveTimer) {
+      clearTimeout(autoSaveTimer);
+    }
+
+    // Set a new timer to save after 500ms of inactivity
+    const timer = setTimeout(() => {
+      saveInspectionData();
+    }, 500);
+
+    setAutoSaveTimer(timer);
+
+    // Cleanup on unmount
+    return () => {
+      if (autoSaveTimer) {
+        clearTimeout(autoSaveTimer);
+      }
+    };
+  }, [inspectionData, isLoaded]);
+
+  // Save inspection data to localStorage
+  const saveInspectionData = () => {
     try {
       const savedInspections = localStorage.getItem('vehicleInspections');
       const inspections = savedInspections ? JSON.parse(savedInspections) : {};
@@ -553,10 +576,18 @@ const InspectionChecklist: React.FC<InspectionChecklistProps> = ({ vehicle, onSt
       
       inspections[vehicle.id] = dataToSave;
       localStorage.setItem('vehicleInspections', JSON.stringify(inspections));
+      
+      // Trigger storage event for real-time updates
+      window.dispatchEvent(new StorageEvent('storage', {
+        key: 'vehicleInspections',
+        newValue: JSON.stringify(inspections)
+      }));
+      
+      console.log(`✅ Inspection data auto-saved for vehicle ${vehicle.id}`);
     } catch (error) {
       console.error('Error saving inspection data:', error);
     }
-  }, [inspectionData, vehicle.id, isLoaded]);
+  };
 
   // 🎯 ENHANCED: Auto-use logged-in user's initials
   const updateInspectionItem = (section: keyof InspectionData, key: string, rating: ItemRating) => {
@@ -656,6 +687,7 @@ const InspectionChecklist: React.FC<InspectionChecklistProps> = ({ vehicle, onSt
   };
 
   const handleSave = () => {
+    saveInspectionData();
     alert('✅ Inspection data saved successfully!');
   };
 
