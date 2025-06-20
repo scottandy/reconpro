@@ -8,6 +8,7 @@ import StatusBadge from './StatusBadge';
 import InspectionChecklist from './InspectionChecklist';
 import TeamNotes from './TeamNotes';
 import CustomerInspectionPDF from './CustomerInspectionPDF';
+import { ProgressCalculator } from '../utils/progressCalculator';
 import { 
   ArrowLeft, 
   Car, 
@@ -248,9 +249,9 @@ const VehicleDetail: React.FC = () => {
 
   const getOverallProgress = () => {
     if (!vehicle) return 0;
-    const statuses = Object.values(vehicle.status);
-    const completed = statuses.filter(status => status === 'completed').length;
-    return (completed / statuses.length) * 100;
+    
+    // Use the new detailed progress calculator
+    return ProgressCalculator.calculateDetailedProgress(vehicle.id, vehicle);
   };
 
   const getStockNumber = (vin: string): string => {

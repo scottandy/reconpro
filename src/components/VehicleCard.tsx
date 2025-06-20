@@ -5,6 +5,7 @@ import StatusBadge from './StatusBadge';
 import { MapPin, Gauge, Clock, FileText, AlertTriangle } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { InspectionSettingsManager } from '../utils/inspectionSettingsManager';
+import { ProgressCalculator } from '../utils/progressCalculator';
 
 interface VehicleCardProps {
   vehicle: Vehicle;
@@ -14,9 +15,8 @@ const VehicleCard: React.FC<VehicleCardProps> = ({ vehicle }) => {
   const { dealership } = useAuth();
   
   const getOverallProgress = () => {
-    const statuses = Object.values(vehicle.status);
-    const completed = statuses.filter(status => status === 'completed').length;
-    return (completed / statuses.length) * 100;
+    // Use the new detailed progress calculator
+    return ProgressCalculator.calculateDetailedProgress(vehicle.id, vehicle);
   };
 
   const getDaysInInventory = () => {
