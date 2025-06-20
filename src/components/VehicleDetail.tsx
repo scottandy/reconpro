@@ -364,11 +364,66 @@ const VehicleDetail: React.FC = () => {
                   {vehicle.trim && <span className="text-gray-600 font-normal"> {vehicle.trim}</span>}
                 </h1>
                 <p className="text-sm text-gray-600">Stock #{getStockNumber(vehicle.vin)}</p>
+                
+                {/* Mobile Status Badges - Below Stock Number */}
+                <div className="flex flex-wrap items-center gap-2 mt-1 lg:hidden">
+                  {isEditingLocation ? (
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="text"
+                        value={editedLocation}
+                        onChange={(e) => setEditedLocation(e.target.value)}
+                        className="px-2 py-1 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-xs min-w-[120px]"
+                        placeholder="Enter location"
+                        autoFocus
+                        onKeyPress={(e) => {
+                          if (e.key === 'Enter') {
+                            handleSaveLocation();
+                          } else if (e.key === 'Escape') {
+                            handleCancelEditLocation();
+                          }
+                        }}
+                      />
+                      <button
+                        onClick={handleSaveLocation}
+                        className="p-1 text-green-600 hover:bg-green-50 rounded transition-colors"
+                        title="Save location"
+                      >
+                        <Save className="w-3 h-3" />
+                      </button>
+                      <button
+                        onClick={handleCancelEditLocation}
+                        className="p-1 text-gray-600 hover:bg-gray-50 rounded transition-colors"
+                        title="Cancel"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => setIsEditingLocation(true)}
+                      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-medium border transition-all duration-200 ${locationStyle.bgColor} ${locationStyle.textColor} ${locationStyle.borderColor}`}
+                      title="Click to edit location"
+                    >
+                      <MapPin className="w-3 h-3" />
+                      <span>{vehicle.location}</span>
+                      <Edit3 className="w-2 h-2 opacity-60" />
+                    </button>
+                  )}
+                  
+                  {isReadyForSale && (
+                    <div className="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded-full text-xs font-semibold border border-emerald-200">
+                      <CheckCircle2 className="w-3 h-3" />
+                      Ready for Sale
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
             
-            <div className="flex items-center gap-4">
-              {/* NEW: Editable Location Status */}
+            {/* Desktop Status Badges - Right Side */}
+            <div className="hidden lg:flex items-center gap-4">
+              {/* Editable Location Status */}
               <div className="flex items-center gap-2">
                 {isEditingLocation ? (
                   <div className="flex items-center gap-2">
