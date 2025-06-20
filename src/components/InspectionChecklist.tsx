@@ -4,7 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { AnalyticsManager } from '../utils/analytics';
 import { InspectionSettingsManager } from '../utils/inspectionSettingsManager';
 import { InspectionSettings, InspectionSection, InspectionItem, RatingLabel } from '../types/inspectionSettings';
-import { CheckCircle2, Circle, Save, Star, AlertTriangle, CheckCircle, Clock, Filter, X, ChevronDown, ChevronUp } from 'lucide-react';
+import { CheckCircle2, Circle, Save, Star, AlertTriangle, CheckCircle, Clock, Filter, X, ChevronDown, ChevronUp, FileText } from 'lucide-react';
 
 interface InspectionChecklistProps {
   vehicle: Vehicle;
@@ -12,6 +12,7 @@ interface InspectionChecklistProps {
   onSectionComplete: (section: keyof Vehicle['status'], userInitials: string) => void;
   onAddTeamNote: (note: Omit<TeamNote, 'id' | 'timestamp'>) => void;
   activeFilter?: string | null;
+  onGeneratePdf?: () => void;
 }
 
 type ItemRating = 'great' | 'fair' | 'needs-attention' | 'not-checked';
@@ -478,7 +479,14 @@ const ChecklistSection: React.FC<{
   );
 };
 
-const InspectionChecklist: React.FC<InspectionChecklistProps> = ({ vehicle, onStatusUpdate, onSectionComplete, onAddTeamNote, activeFilter }) => {
+const InspectionChecklist: React.FC<InspectionChecklistProps> = ({ 
+  vehicle, 
+  onStatusUpdate, 
+  onSectionComplete, 
+  onAddTeamNote, 
+  activeFilter,
+  onGeneratePdf 
+}) => {
   const { user, dealership } = useAuth();
   const [inspectionData, setInspectionData] = useState<InspectionData>(DEFAULT_INSPECTION_DATA);
   const [isLoaded, setIsLoaded] = useState(false);
@@ -901,8 +909,20 @@ const InspectionChecklist: React.FC<InspectionChecklistProps> = ({ vehicle, onSt
         />
       </div>
 
-      {/* Manual Save Button */}
-      <div className="flex justify-end">
+      {/* Action Buttons */}
+      <div className="flex justify-end gap-3">
+        {/* Generate PDF Button - Now positioned to the left of Save */}
+        {onGeneratePdf && (
+          <button
+            onClick={onGeneratePdf}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm"
+          >
+            <FileText className="w-4 h-4" />
+            Generate Customer PDF
+          </button>
+        )}
+        
+        {/* Save Button */}
         <button
           onClick={handleSave}
           className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm"
